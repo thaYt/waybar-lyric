@@ -27,6 +27,7 @@ func main() {
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
 	}
+
 	var err error
 	cli := Cli{MaxLength: 150}
 	if _, err = clap.Parse(args, &cli); err != nil {
@@ -81,9 +82,9 @@ func Execute(cli Cli) {
 		"paused": "",
 		"lyric": "",
 	},
-	"exec-if": "which waytune",
-	"exec": "waytune lyrics --max-length 100",
-	"on-click": "waytune lyrics --toggle",
+	"exec-if": "which waybar-lyric",
+	"exec": "waybar-lyric --max-length 100",
+	"on-click": "waybar-lyric --toggle",
 },
 `)
 		os.Exit(0)
