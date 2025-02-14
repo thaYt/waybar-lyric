@@ -35,6 +35,16 @@ func main() {
 	}
 
 	if cli.Help {
+		fmt.Print(`Get spotify lyrics in your waybar
+
+waybar-lyric [FLAGS]
+
+  -h, --help          Show the help message
+  --init              Show json snippet for waybar/config.jsonc
+  --toggle            Pause or Resume spotify playback
+  --max-length <int>  Maximum lenght of lyrics text
+`)
+
 		os.Exit(0)
 	}
 
