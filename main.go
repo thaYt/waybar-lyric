@@ -28,8 +28,8 @@ func main() {
 		args = os.Args[1:]
 	}
 	var err error
-	cli := &Cli{MaxLength: 150}
-	if _, err = clap.Parse(args, cli); err != nil {
+	cli := Cli{MaxLength: 150}
+	if _, err = clap.Parse(args, &cli); err != nil {
 		Log(err)
 		os.Exit(1)
 	}
@@ -48,7 +48,7 @@ waybar-lyric [FLAGS]
 		os.Exit(0)
 	}
 
-	Execute(*cli)
+	Execute(cli)
 }
 
 func Log(a ...any) {
