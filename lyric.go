@@ -12,7 +12,7 @@ import (
 const LRCLIB_ENDPOINT = "https://lrclib.net/api/get"
 
 func FetchLyrics(url string, uri string) ([]LyricLine, error) {
-	notFoundTempDir := filepath.Join(os.TempDir(), "WayTune")
+	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
 	lyricsNotFoundFile := filepath.Join(notFoundTempDir, uri+"-not-found")
 
 	if _, err := os.Stat(lyricsNotFoundFile); err == nil {
@@ -20,7 +20,7 @@ func FetchLyrics(url string, uri string) ([]LyricLine, error) {
 	}
 
 	userCacheDir, _ := os.UserCacheDir()
-	cacheDir := filepath.Join(userCacheDir, "WayTune-Lyrics")
+	cacheDir := filepath.Join(userCacheDir, "waybar-lyric")
 
 	uri = strings.ReplaceAll(uri, "/", "-")
 	cacheFile := filepath.Join(cacheDir, uri+".csv")

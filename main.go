@@ -93,7 +93,7 @@ func Execute(cli Cli) {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetEscapeHTML(false)
 
-	lockFile := filepath.Join(os.TempDir(), "WayTune-Lyrics.lock")
+	lockFile := filepath.Join(os.TempDir(), "waybar-lyric.lock")
 	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		Log("Failed to open or create lock file:", err)
