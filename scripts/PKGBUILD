@@ -1,7 +1,7 @@
 # This a sample PKGBUILD and you can upload it to AUR if you want (Not recommended)
 _pkgname=waybar-lyric
 pkgname=${_pkgname}-git
-pkgver=0.2.1.r0.g48932d1
+pkgver=0.2.2.r0.g418fc97
 pkgrel=1
 pkgdesc="Get lyrics of currently playling song on waybar"
 arch=('x86_64')
