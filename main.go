@@ -50,7 +50,7 @@ func main() {
 	}
 
 	if *logFile != "" {
-		os.MkdirAll(filepath.Base(*logFile), 0755)
+		os.MkdirAll(filepath.Dir(*logFile), 0755)
 
 		file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
