@@ -200,7 +200,7 @@ func Execute(cli Cli) {
 	}
 	params := queryParams.Encode()
 
-	url := fmt.Sprintf("%s?%s", LRCLIB_ENDPOINT, params)
+	url := fmt.Sprintf("%s?%s", LrclibEndpoint, params)
 	uri := filepath.Base(meta["mpris:trackid"].Value().(string))
 
 	lyrics, err := FetchLyrics(url, uri)

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const LRCLIB_ENDPOINT = "https://lrclib.net/api/get"
+const LrclibEndpoint = "https://lrclib.net/api/get"
 
 func FetchLyrics(url string, uri string) ([]LyricLine, error) {
 	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
