@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/Pauloo27/go-mpris"
 	"github.com/fred1268/go-clap/clap"
@@ -90,9 +88,6 @@ func Execute(cli Cli) {
 		os.Exit(0)
 	}
 
-	encoder := json.NewEncoder(os.Stdout)
-	encoder.SetEscapeHTML(false)
-
 	lockFile := filepath.Join(os.TempDir(), "waybar-lyric.lock")
 	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
@@ -118,6 +113,7 @@ func Execute(cli Cli) {
 		Log(err)
 		os.Exit(1)
 	}
+
 	names, err := mpris.List(conn)
 	if err != nil {
 		Log(err)
@@ -146,78 +142,40 @@ func Execute(cli Cli) {
 		os.Exit(0)
 	}
 
-	meta, err := player.GetMetadata()
+	info, err := GetSpotifyInfo(player)
 	if err != nil {
 		Log(err)
-		os.Exit(1)
+		return
 	}
 
-	status, err := player.GetPlaybackStatus()
-	if err != nil {
-		Log(err)
-		os.Exit(1)
-	}
-
-	artist := meta["xesam:artist"].Value().([]string)[0]
-	title := meta["xesam:title"].Value().(string)
-	album := meta["xesam:album"].Value().(string)
-
-	if title == "" || artist == "" {
-		os.Exit(1)
-	}
-
-	length := time.Duration(meta["mpris:length"].Value().(uint64)) * time.Microsecond
-
-	pos, err := player.GetPosition()
-	if err != nil {
-		os.Exit(1)
-	}
-	position := time.Duration(pos * float64(time.Second))
-
-	if status == "Paused" {
-		encoder.Encode(Lyrics{
-			Text:       fmt.Sprintf("%s - %s", artist, title),
-			Class:      "info",
-			Alt:        "paused",
-			Tooltip:    "",
-			Percentage: int(100 * position / length),
-		})
-		os.Exit(0)
-	}
-
-	if status == "Stopped" {
+	if info.Status == "Stopped" {
 		os.Exit(0)
 	}
 
 	queryParams := url.Values{}
-	queryParams.Set("track_name", title)
-	queryParams.Set("artist_name", artist)
-	if album != "" {
-		queryParams.Set("album_name", album)
+	queryParams.Set("track_name", info.Title)
+	queryParams.Set("artist_name", info.Artist)
+	if info.Album != "" {
+		queryParams.Set("album_name", info.Album)
 	}
-	if length != 0 {
-		queryParams.Set("duration", fmt.Sprintf("%.2f", length.Seconds()))
+	if info.Length != 0 {
+		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
 	}
 	params := queryParams.Encode()
 
 	url := fmt.Sprintf("%s?%s", LrclibEndpoint, params)
-	uri := filepath.Base(meta["mpris:trackid"].Value().(string))
+	uri := filepath.Base(info.ID)
 
 	lyrics, err := FetchLyrics(url, uri)
 	if err != nil {
 		Log(err)
-		encoder.Encode(Lyrics{
-			Text:       fmt.Sprintf("%s - %s", artist, title),
-			Class:      "info",
-			Alt:        "playing",
-			Percentage: int(100 * position / length),
-		})
+		info.Waybar().Encode()
 		os.Exit(0)
 	}
 
 	var idx int
 	for i, line := range lyrics {
-		if position < line.Timestamp {
+		if info.Position < line.Timestamp {
 			break
 		}
 		idx = i
@@ -239,21 +197,11 @@ func Execute(cli Cli) {
 			tooltip.WriteString(lineText + "\n")
 		}
 
-		encoder.Encode(Lyrics{
-			Text:       truncate(currentLine, cli.MaxLength),
-			Class:      "lyric",
-			Alt:        "lyric",
-			Tooltip:    strings.TrimSpace(tooltip.String()),
-			Percentage: int(100 * position / length),
-		})
+		line := truncate(currentLine, cli.MaxLength)
+		NewWaybarLyrics(line, tooltip.String(), info.Percentage()).Encode()
+
 		os.Exit(0)
 	}
 
-	encoder.Encode(Lyrics{
-		Text:       fmt.Sprintf("%s - %s", artist, title),
-		Class:      "info",
-		Alt:        "playing",
-		Tooltip:    "",
-		Percentage: int(100 * position / length),
-	})
+	info.Waybar().Encode()
 }
