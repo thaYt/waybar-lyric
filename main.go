@@ -8,46 +8,11 @@ import (
 	"syscall"
 
 	"github.com/Pauloo27/go-mpris"
-	"github.com/fred1268/go-clap/clap"
 	"github.com/godbus/dbus/v5"
+	"github.com/spf13/pflag"
 )
 
-type Cli struct {
-	Init      bool `clap:"--init"`
-	Toggle    bool `clap:"--toggle"`
-	MaxLength int  `clap:"--max-length"`
-	Help      bool `clap:"--help,-h"`
-}
-
-func main() {
-	args := make([]string, 0)
-	if len(os.Args) > 1 {
-		args = os.Args[1:]
-	}
-
-	var err error
-	cli := Cli{MaxLength: 150}
-	if _, err = clap.Parse(args, &cli); err != nil {
-		Log(err)
-		os.Exit(1)
-	}
-
-	if cli.Help {
-		fmt.Print(`Get spotify lyrics in your waybar
-
-waybar-lyric [FLAGS]
-
-  -h, --help          Show the help message
-  --init              Show json snippet for waybar/config.jsonc
-  --toggle            Pause or Resume spotify playback
-  --max-length <int>  Maximum lenght of lyrics text
-`)
-
-		os.Exit(0)
-	}
-
-	Execute(cli)
-}
+const DefaultMaxLength = 150
 
 func Log(a ...any) {
 	fmt.Fprintln(os.Stderr, a...)
@@ -65,8 +30,35 @@ func truncate(input string, limit int) string {
 	return input[:limit]
 }
 
-func Execute(cli Cli) {
-	if cli.Init {
+func main() {
+	init := pflag.Bool("init", false, "Show json snippet for waybar/config.jsonc")
+	toggleState := pflag.Bool("toggle", false, "Toggle player state (pause/resume)")
+	maxLineLength := pflag.Int("max-length", DefaultMaxLength, "Maximum lenght of lyrics text")
+
+	pflag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "Get spotify lyrics on waybar.\n\n")
+		fmt.Println("Options:")
+		fmt.Println(pflag.CommandLine.FlagUsages())
+	}
+
+	pflag.Parse()
+
+	// 	if cli.Help {
+	// 		fmt.Print(`Get spotify lyrics in your waybar
+	//
+	// waybar-lyric [FLAGS]
+	//
+	//   -h, --help          Show the help message
+	//   --init              Show json snippet for waybar/config.jsonc
+	//   --toggle            Pause or Resume spotify playback
+	//   --max-length <int>  Maximum lenght of lyrics text
+	// `)
+	//
+	// 	os.Exit(0)
+	// }
+
+	if *init {
 		fmt.Print(`Put the following object in your waybar config:
 
 "custom/lyrics": {
@@ -135,7 +127,7 @@ func Execute(cli Cli) {
 
 	player := mpris.New(conn, playerName)
 
-	if cli.Toggle {
+	if *toggleState {
 		player.PlayPause()
 		UpdateWaybar()
 		os.Exit(0)
@@ -182,7 +174,7 @@ func Execute(cli Cli) {
 			tooltip.WriteString(lineText + "\n")
 		}
 
-		line := truncate(currentLine, cli.MaxLength)
+		line := truncate(currentLine, *maxLineLength)
 		NewWaybarLyrics(line, tooltip.String(), info.Percentage()).Encode()
 
 		os.Exit(0)
