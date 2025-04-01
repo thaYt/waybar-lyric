@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -43,10 +44,10 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	if cahcedLyrics, err := LoadCache(cacheFile); err == nil {
 		return cahcedLyrics, nil
 	} else {
-		Log(err)
+		slog.Warn("Can't find the lyrics in the cache", "error", err)
 	}
 
-	Log("Fetching lyrics from LRCLIB:", url)
+	slog.Info("Fetching lyrics from Lrclib", "url", url)
 
 	resp, err := http.Get(url)
 	if err != nil {

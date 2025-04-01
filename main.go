@@ -2,21 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
 
+	"github.com/MatusOllah/slogcolor"
 	"github.com/Pauloo27/go-mpris"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/pflag"
 )
 
 const DefaultMaxLength = 150
-
-func Log(a ...any) {
-	fmt.Fprintln(os.Stderr, a...)
-}
 
 func truncate(input string, limit int) string {
 	if len(input) <= limit {
@@ -34,6 +32,8 @@ func main() {
 	init := pflag.Bool("init", false, "Show json snippet for waybar/config.jsonc")
 	toggleState := pflag.Bool("toggle", false, "Toggle player state (pause/resume)")
 	maxLineLength := pflag.Int("max-length", DefaultMaxLength, "Maximum lenght of lyrics text")
+	logLevelF := pflag.BoolP("verbose", "v", false, "Use verbose loggin")
+	logFile := pflag.String("log-file", "", "File to where logs should be save")
 
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", os.Args[0])
@@ -43,6 +43,27 @@ func main() {
 	}
 
 	pflag.Parse()
+
+	opts := slogcolor.DefaultOptions
+	if *logLevelF {
+		opts.Level = slog.LevelDebug
+	}
+
+	if *logFile != "" {
+		os.MkdirAll(filepath.Base(*logFile), 0755)
+
+		file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+		if err != nil {
+			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+			slog.Error("Failed to open log-file", "error", err)
+		} else {
+			opts.NoColor = true
+			slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
+			defer file.Close() // Close the file when done
+		}
+	} else {
+		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+	}
 
 	if *init {
 		fmt.Print(`Put the following object in your waybar config:
@@ -68,7 +89,7 @@ func main() {
 	lockFile := filepath.Join(os.TempDir(), "waybar-lyric.lock")
 	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
-		Log("Failed to open or create lock file:", err)
+		slog.Error("Failed to open or create lock file", "error", err)
 		os.Exit(1)
 	}
 	defer file.Close()
@@ -76,10 +97,10 @@ func main() {
 	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
 	if err != nil {
 		if err == syscall.EWOULDBLOCK {
-			Log("Another instance of the CLI is already running. Exiting.")
+			slog.Warn("Another instance of the CLI is already running. Exiting.")
 			os.Exit(0)
 		}
-		Log("Failed to acquire lock:", err)
+		slog.Error("Failed to acquire lock", "error", err)
 		os.Exit(1)
 	}
 
@@ -87,13 +108,13 @@ func main() {
 
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		Log(err)
+		slog.Error("Failed to create dbus connection", "error", err)
 		os.Exit(1)
 	}
 
 	names, err := mpris.List(conn)
 	if err != nil {
-		Log(err)
+		slog.Error("Failed to find list of player", "error", err)
 		os.Exit(1)
 	}
 
@@ -107,31 +128,40 @@ func main() {
 	}
 
 	if playerName == "" {
-		Log("failed to find player")
+		slog.Error("Can't find supported player", "error", err)
 		os.Exit(1)
 	}
 
 	player := mpris.New(conn, playerName)
 
 	if *toggleState {
-		player.PlayPause()
-		UpdateWaybar()
+		slog.Info("Toggling player state")
+		if err := player.PlayPause(); err != nil {
+			slog.Error("Failed to toggle player state", "error", err)
+		}
+
+		if err := UpdateWaybar(); err != nil {
+			slog.Error("Failed to update waybar through signals", "error", err)
+		}
 		os.Exit(0)
 	}
 
 	info, err := GetSpotifyInfo(player)
 	if err != nil {
-		Log(err)
+		slog.Error("Failed to parse dbus mpris metadata", "error", err)
 		return
 	}
 
+	slog.Info("Player media found", "title", info.Title, "artist", info.Artist)
+
 	if info.Status == "Stopped" {
+		slog.Info("Player is stopped")
 		os.Exit(0)
 	}
 
 	lyrics, err := FetchLyrics(info)
 	if err != nil {
-		Log(err)
+		slog.Error("Failed to get lyrics", "error", err)
 		info.Waybar().Encode()
 		os.Exit(0)
 	}
