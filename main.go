@@ -226,15 +226,8 @@ func Execute(cli Cli) {
 	currentLine := lyrics[idx].Text
 
 	if currentLine != "" {
-		start := idx - 2
-		if start < 0 {
-			start = 0
-		}
-
-		end := idx + 5
-		if end > len(lyrics) {
-			end = len(lyrics)
-		}
+		start := max(idx-2, 0)
+		end := min(idx+5, len(lyrics))
 
 		tooltipLyrics := lyrics[start:end]
 		var tooltip strings.Builder
