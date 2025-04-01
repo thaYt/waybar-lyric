@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +12,21 @@ import (
 
 const LrclibEndpoint = "https://lrclib.net/api/get"
 
-func FetchLyrics(url string, uri string) ([]LyricLine, error) {
+func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
+	queryParams := url.Values{}
+	queryParams.Set("track_name", info.Title)
+	queryParams.Set("artist_name", info.Artist)
+	if info.Album != "" {
+		queryParams.Set("album_name", info.Album)
+	}
+	if info.Length != 0 {
+		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
+	}
+	params := queryParams.Encode()
+
+	url := fmt.Sprintf("%s?%s", LrclibEndpoint, params)
+	uri := filepath.Base(info.ID)
+
 	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
 	lyricsNotFoundFile := filepath.Join(notFoundTempDir, uri+"-not-found")
 

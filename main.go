@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -152,21 +151,7 @@ func Execute(cli Cli) {
 		os.Exit(0)
 	}
 
-	queryParams := url.Values{}
-	queryParams.Set("track_name", info.Title)
-	queryParams.Set("artist_name", info.Artist)
-	if info.Album != "" {
-		queryParams.Set("album_name", info.Album)
-	}
-	if info.Length != 0 {
-		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
-	}
-	params := queryParams.Encode()
-
-	url := fmt.Sprintf("%s?%s", LrclibEndpoint, params)
-	uri := filepath.Base(info.ID)
-
-	lyrics, err := FetchLyrics(url, uri)
+	lyrics, err := FetchLyrics(info)
 	if err != nil {
 		Log(err)
 		info.Waybar().Encode()
