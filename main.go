@@ -154,8 +154,13 @@ func main() {
 
 	slog.Info("Player media found", "title", info.Title, "artist", info.Artist)
 
-	if info.Status == "Stopped" {
+	if info.Status == mpris.PlaybackStopped {
 		slog.Info("Player is stopped")
+		os.Exit(0)
+	}
+
+	if info.Status == mpris.PlaybackPaused {
+		info.Waybar().Encode()
 		os.Exit(0)
 	}
 
