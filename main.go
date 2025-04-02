@@ -16,15 +16,17 @@ import (
 const DefaultMaxLength = 150
 
 func truncate(input string, limit int) string {
-	if len(input) <= limit {
+	r := []rune(input)
+
+	if len(r) <= limit {
 		return input
 	}
 
 	if limit > 3 {
-		return input[:limit-3] + "..."
+		return string(r[:limit-3]) + "..."
 	}
 
-	return input[:limit]
+	return string(r[:limit])
 }
 
 func main() {
