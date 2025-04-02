@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"github.com/MatusOllah/slogcolor"
 	"github.com/Pauloo27/go-mpris"
@@ -86,25 +85,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	lockFile := filepath.Join(os.TempDir(), "waybar-lyric.lock")
-	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
+	lock, err := Flock()
 	if err != nil {
-		slog.Error("Failed to open or create lock file", "error", err)
-		os.Exit(1)
+		return
 	}
-	defer file.Close()
-
-	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
-	if err != nil {
-		if err == syscall.EWOULDBLOCK {
-			slog.Warn("Another instance of the CLI is already running. Exiting.")
-			os.Exit(0)
-		}
-		slog.Error("Failed to acquire lock", "error", err)
-		os.Exit(1)
-	}
-
-	defer os.Remove(lockFile)
+	defer lock.Close()
 
 	conn, err := dbus.SessionBus()
 	if err != nil {
