@@ -82,7 +82,7 @@ func main() {
 	"on-click": "waybar-lyric --toggle",
 },
 `)
-		os.Exit(0)
+		return
 	}
 
 	lock, err := Flock()
@@ -94,13 +94,13 @@ func main() {
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		slog.Error("Failed to create dbus connection", "error", err)
-		os.Exit(1)
+		return
 	}
 
 	names, err := mpris.List(conn)
 	if err != nil {
 		slog.Error("Failed to find list of player", "error", err)
-		os.Exit(1)
+		return
 	}
 
 	searchTerm := "spotify"
@@ -114,7 +114,7 @@ func main() {
 
 	if playerName == "" {
 		slog.Error("Can't find supported player", "error", err)
-		os.Exit(1)
+		return
 	}
 
 	player := mpris.New(conn, playerName)
@@ -128,7 +128,7 @@ func main() {
 		if err := UpdateWaybar(); err != nil {
 			slog.Error("Failed to update waybar through signals", "error", err)
 		}
-		os.Exit(0)
+		return
 	}
 
 	info, err := GetSpotifyInfo(player)
@@ -141,19 +141,19 @@ func main() {
 
 	if info.Status == mpris.PlaybackStopped {
 		slog.Info("Player is stopped")
-		os.Exit(0)
+		return
 	}
 
 	if info.Status == mpris.PlaybackPaused {
 		info.Waybar().Encode()
-		os.Exit(0)
+		return
 	}
 
 	lyrics, err := FetchLyrics(info)
 	if err != nil {
 		slog.Error("Failed to get lyrics", "error", err)
 		info.Waybar().Encode()
-		os.Exit(0)
+		return
 	}
 
 	var idx int
@@ -182,8 +182,7 @@ func main() {
 
 		line := truncate(currentLine, *maxLineLength)
 		NewWaybarLyrics(line, tooltip.String(), info.Percentage()).Encode()
-
-		os.Exit(0)
+		return
 	}
 
 	info.Waybar().Encode()
