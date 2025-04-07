@@ -15,7 +15,7 @@ import (
 
 const DefaultMaxLength = 150
 
-const Version = "waybar-lyric v0.5.0 (https://github.com/Nadim147c/waybar-lyric)"
+const Version = "waybar-lyric v0.5.1 (https://github.com/Nadim147c/waybar-lyric)"
 
 func truncate(input string, limit int) string {
 	r := []rune(input)
