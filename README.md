@@ -102,7 +102,7 @@ If you encounter issues:
 
 ## License
 
-This repository is licensed under [AGPL-3.0](./LICENSE)
+This repository is licensed under [AGPL-3.0](./LICENSE). Thanks to [LrcLib](https://lrclib.net/) for providing lyrics.
 
 ## Contributing
 
