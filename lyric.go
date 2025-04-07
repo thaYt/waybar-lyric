@@ -11,21 +11,28 @@ import (
 	"strings"
 )
 
-const LrclibEndpoint = "https://lrclib.net/api/get"
+const (
+	UserAgent      = "waybar-lyric v0.4.0 (https://github.com/Nadim147c/waybar-lyric)"
+	LrclibEndpoint = "https://lrclib.net/api/get"
+)
+
+func request(params url.Values, header http.Header) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, LrclibEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.URL.RawQuery = params.Encode()
+	req.Header = header
+
+	slog.Info("Fetching lyrics from Lrclib", "url", req.URL.String())
+
+	client := http.Client{}
+
+	return client.Do(req)
+}
 
 func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
-	queryParams := url.Values{}
-	queryParams.Set("track_name", info.Title)
-	queryParams.Set("artist_name", info.Artist)
-	if info.Album != "" {
-		queryParams.Set("album_name", info.Album)
-	}
-	if info.Length != 0 {
-		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
-	}
-	params := queryParams.Encode()
-
-	url := fmt.Sprintf("%s?%s", LrclibEndpoint, params)
 	uri := filepath.Base(info.ID)
 
 	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
@@ -47,16 +54,27 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 		slog.Warn("Can't find the lyrics in the cache", "error", err)
 	}
 
-	slog.Info("Fetching lyrics from Lrclib", "url", url)
+	queryParams := url.Values{}
+	queryParams.Set("track_name", info.Title)
+	queryParams.Set("artist_name", info.Artist)
+	if info.Album != "" {
+		queryParams.Set("album_name", info.Album)
+	}
+	if info.Length != 0 {
+		queryParams.Set("duration", fmt.Sprintf("%.2f", info.Length.Seconds()))
+	}
 
-	resp, err := http.Get(url)
+	header := http.Header{}
+	header.Set("User-Agent", UserAgent)
+
+	resp, err := request(queryParams, header)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch lyrics: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		os.WriteFile(lyricsNotFoundFile, []byte(url), 644)
+		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("Lyrics not found")
 	}
 
