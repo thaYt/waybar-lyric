@@ -119,6 +119,7 @@ func main() {
 		return
 	}
 
+	slog.Info("Player selected", "name", playerName)
 	player := mpris.New(conn, playerName)
 
 	if *toggleState {
