@@ -1,10 +1,13 @@
 # waybar-lyric
 
-A CLI tool that displays Spotify lyrics on your [Waybar](https://github.com/Alexays/Waybar) for Linux systems.
+A CLI tool that displays Spotify lyrics on your
+[Waybar](https://github.com/Alexays/Waybar) for Linux systems.
 
 ## Description
 
-`waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a scrolling lyrics display that syncs with your currently playing music, enhancing your desktop music experience.
+`waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
+scrolling lyrics display that syncs with your currently playing music, enhancing your
+desktop music experience.
 
 ## Features
 
@@ -72,13 +75,15 @@ Options:
 
 ### Waybar Configuration
 
-The recommended way to configure waybar-lyric is to generate the configuration snippet using the built-in command:
+The recommended way to configure waybar-lyric is to generate the configuration
+snippet using the built-in command:
 
 ```bash
 waybar-lyric --init
 ```
 
-This will output the proper JSON configuration snippet that you can copy directly into your Waybar `config.jsonc` file.
+This will output the proper JSON configuration snippet that you can copy directly
+into your Waybar `config.jsonc` file.
 
 ### Style Example
 
@@ -102,7 +107,8 @@ If you encounter issues:
 
 ## License
 
-This repository is licensed under [AGPL-3.0](./LICENSE). Thanks to [LrcLib](https://lrclib.net/) for providing lyrics.
+This repository is licensed under [AGPL-3.0](./LICENSE). Thanks to
+[LrcLib](https://lrclib.net/) for providing lyrics.
 
 ## Contributing
 
