@@ -192,7 +192,8 @@ func main() {
 		}
 
 		line := truncate(currentLine, *maxLineLength)
-		NewWaybarLyrics(line, tooltip.String(), info.Percentage()).Encode()
+		tt := strings.TrimSpace(tooltip.String())
+		NewWaybarLyrics(line, tt, info.Percentage()).Encode()
 		return
 	}
 
