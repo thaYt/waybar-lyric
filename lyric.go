@@ -11,10 +11,7 @@ import (
 	"strings"
 )
 
-const (
-	UserAgent      = "waybar-lyric v0.4.0 (https://github.com/Nadim147c/waybar-lyric)"
-	LrclibEndpoint = "https://lrclib.net/api/get"
-)
+const LrclibEndpoint = "https://lrclib.net/api/get"
 
 func request(params url.Values, header http.Header) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodGet, LrclibEndpoint, nil)
@@ -65,7 +62,7 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	}
 
 	header := http.Header{}
-	header.Set("User-Agent", UserAgent)
+	header.Set("User-Agent", Version)
 
 	resp, err := request(queryParams, header)
 	if err != nil {

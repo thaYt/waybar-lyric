@@ -15,6 +15,8 @@ import (
 
 const DefaultMaxLength = 150
 
+const Version = "waybar-lyric v0.4.0 (https://github.com/Nadim147c/waybar-lyric)"
+
 func truncate(input string, limit int) string {
 	r := []rune(input)
 
@@ -33,6 +35,7 @@ func main() {
 	init := pflag.Bool("init", false, "Show json snippet for waybar/config.jsonc")
 	toggleState := pflag.Bool("toggle", false, "Toggle player state (pause/resume)")
 	maxLineLength := pflag.Int("max-length", DefaultMaxLength, "Maximum lenght of lyrics text")
+	version := pflag.Bool("version", false, "Print the version of waybar-lyric")
 	logLevelF := pflag.BoolP("verbose", "v", false, "Use verbose loggin")
 	logFile := pflag.String("log-file", "", "File to where logs should be save")
 
@@ -44,6 +47,11 @@ func main() {
 	}
 
 	pflag.Parse()
+
+	if *version {
+		fmt.Fprint(os.Stderr, Version)
+		return
+	}
 
 	opts := slogcolor.DefaultOptions
 	if *logLevelF {
