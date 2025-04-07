@@ -75,7 +75,7 @@ func main() {
 	}
 
 	if *init {
-		fmt.Print(`Put the following object in your waybar config:
+		fmt.Printf(`Put the following object in your waybar config:
 
 "custom/lyrics": {
 	"interval": 1,
@@ -88,10 +88,10 @@ func main() {
 		"lyric": "",
 	},
 	"exec-if": "which waybar-lyric",
-	"exec": "waybar-lyric --max-length 100",
+	"exec": "waybar-lyric --max-length %d",
 	"on-click": "waybar-lyric --toggle",
 },
-`)
+`, *maxLineLength)
 		return
 	}
 
