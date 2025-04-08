@@ -35,13 +35,15 @@ desktop music experience.
 
 #### Installation
 
-- From [AUR](https://aur.archlinux.org/packages)
+- From [AUR](https://aur.archlinux.org/packages); Recommended for Arch `btw` users.
 
 ```bash
 yay -S waybar-lyric-git
 ```
 
 - With `go install`
+  > Note: You have to make sure that `$GOPATH/bin/` in your system `PATH` before
+  > running waybar.
 
 ```bash
 go install github.com/Nadim147c/waybar-lyric@latest
