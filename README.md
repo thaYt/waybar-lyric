@@ -3,6 +3,8 @@
 A CLI tool that displays Spotify lyrics on your
 [Waybar](https://github.com/Alexays/Waybar) for Linux systems.
 
+<video src="https://github.com/user-attachments/assets/e192f75d-7a67-423d-abde-ca5ea160e492" height="360" controls></video>
+
 ## Description
 
 `waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
