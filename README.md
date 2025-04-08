@@ -16,7 +16,6 @@ desktop music experience.
 - Smart caching system:
   - Stores available lyrics locally to reduce API requests
   - Remembers songs without lyrics to prevent unnecessary API calls
-- Single instance enforcement via file locking (flocking)
 - Configurable maximum text length
 - Detailed logging options
 
