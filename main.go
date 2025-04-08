@@ -22,7 +22,7 @@ const (
 	PlayerName = "org.mpris.MediaPlayer2.spotify"
 )
 
-const Version = "waybar-lyric v0.5.2 (https://github.com/Nadim147c/waybar-lyric)"
+const Version = "waybar-lyric v0.6.0 (https://github.com/Nadim147c/waybar-lyric)"
 
 func truncate(input string, limit int) string {
 	r := []rune(input)
