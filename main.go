@@ -133,9 +133,12 @@ func main() {
 	psChan := make(chan *dbus.Signal, 0)
 	player.OnSignal(psChan)
 
+	lyricTicker := time.NewTicker(SleepTime)
+	defer lyricTicker.Stop()
+
 	// Main loop
-	ticker := time.NewTicker(SleepTime)
-	defer ticker.Stop()
+	fixedTicker := time.NewTicker(SleepTime)
+	defer fixedTicker.Stop()
 
 	for {
 		select {
@@ -143,7 +146,8 @@ func main() {
 			return // Clean exit on cancel
 		case <-psChan:
 			slog.Debug("Received player update signal")
-		case <-ticker.C:
+		case <-lyricTicker.C:
+		case <-fixedTicker.C:
 		}
 
 		if _, err := player.GetPosition(); err != nil {
@@ -214,16 +218,13 @@ func main() {
 				n := lyrics[idx+1]
 				d := n.Timestamp - info.Position
 				slog.Debug("Sleep", "duration", d.String(), "position", info.Position.String(), "next", n.Timestamp.String())
-				ticker.Reset(d)
-			} else {
-				ticker.Reset(SleepTime)
+				lyricTicker.Reset(d)
 			}
 			continue
 		}
 
 		if playerUpdated {
 			info.Waybar().Encode()
-			ticker.Reset(SleepTime)
 		}
 	}
 }
