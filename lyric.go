@@ -39,8 +39,10 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	uri = strings.ReplaceAll(uri, "/", "-")
 
 	if val, exists := LyricStore.Load(uri); exists {
-		v, ok := val.([]LyricLine)
-		if ok {
+		if v, ok := val.([]LyricLine); ok {
+			if len(v) == 0 {
+				return v, fmt.Errorf("Lyrics doesn't exists")
+			}
 			return v, nil
 		}
 	}
@@ -84,26 +86,35 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
+		LyricStore.Store(uri, []LyricLine{})
 		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("Lyrics not found")
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		LyricStore.Store(uri, []LyricLine{})
+		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
 	var resJson LrcLibResponse
 	err = json.NewDecoder(resp.Body).Decode(&resJson)
 	if err != nil {
+		LyricStore.Store(uri, []LyricLine{})
+		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	lyrics, err := parseLyrics(resJson.SyncedLyrics)
 	if err != nil {
+		LyricStore.Store(uri, []LyricLine{})
+		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
 	if len(lyrics) == 0 {
+		LyricStore.Store(uri, []LyricLine{})
+		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to find sync lyrics lines")
 	}
 
