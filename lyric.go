@@ -8,8 +8,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
+	"sync"
+	"time"
 )
+
+var LyricStore sync.Map
 
 const LrclibEndpoint = "https://lrclib.net/api/get"
 
@@ -31,6 +36,14 @@ func request(params url.Values, header http.Header) (*http.Response, error) {
 
 func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	uri := filepath.Base(info.ID)
+	uri = strings.ReplaceAll(uri, "/", "-")
+
+	if val, exists := LyricStore.Load(uri); exists {
+		v, ok := val.([]LyricLine)
+		if ok {
+			return v, nil
+		}
+	}
 
 	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
 	lyricsNotFoundFile := filepath.Join(notFoundTempDir, uri+"-not-found")
@@ -42,11 +55,11 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	userCacheDir, _ := os.UserCacheDir()
 	cacheDir := filepath.Join(userCacheDir, "waybar-lyric")
 
-	uri = strings.ReplaceAll(uri, "/", "-")
 	cacheFile := filepath.Join(cacheDir, uri+".csv")
 
-	if cahcedLyrics, err := LoadCache(cacheFile); err == nil {
-		return cahcedLyrics, nil
+	if cachedLyrics, err := LoadCache(cacheFile); err == nil {
+		LyricStore.Store(uri, cachedLyrics)
+		return cachedLyrics, nil
 	} else {
 		slog.Warn("Can't find the lyrics in the cache", "error", err)
 	}
@@ -94,6 +107,10 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 		return nil, fmt.Errorf("failed to find sync lyrics lines")
 	}
 
+	slices.SortFunc(lyrics, func(a, b LyricLine) int {
+		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
+	})
+
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create cache directory: %w", err)
 	}
@@ -102,6 +119,8 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to cache lyrics to psudo csv: %w", err)
 	}
+
+	LyricStore.Store(uri, lyrics)
 
 	return lyrics, nil
 }

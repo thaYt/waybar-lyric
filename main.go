@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"path/filepath"
-	"strings"
+	"syscall"
+	"time"
 
 	"github.com/MatusOllah/slogcolor"
 	"github.com/Pauloo27/go-mpris"
@@ -13,7 +16,11 @@ import (
 	"github.com/spf13/pflag"
 )
 
-const DefaultMaxLength = 150
+const (
+	MaxLength  = 150
+	SleepTime  = 500 * time.Millisecond
+	PlayerName = "org.mpris.MediaPlayer2.spotify"
+)
 
 const Version = "waybar-lyric v0.5.2 (https://github.com/Nadim147c/waybar-lyric)"
 
@@ -34,7 +41,7 @@ func truncate(input string, limit int) string {
 func main() {
 	init := pflag.Bool("init", false, "Show json snippet for waybar/config.jsonc")
 	toggleState := pflag.Bool("toggle", false, "Toggle player state (pause/resume)")
-	maxLineLength := pflag.Int("max-length", DefaultMaxLength, "Maximum lenght of lyrics text")
+	maxLineLength := pflag.Int("max-length", MaxLength, "Maximum lenght of lyrics text")
 	version := pflag.Bool("version", false, "Print the version of waybar-lyric")
 	logLevelF := pflag.BoolP("verbose", "v", false, "Use verbose loggin")
 	logFile := pflag.String("log-file", "", "File to where logs should be save")
@@ -78,8 +85,6 @@ func main() {
 		fmt.Printf(`Put the following object in your waybar config:
 
 "custom/lyrics": {
-	"interval": 1,
-	"signal": 4,
 	"return-type": "json",
 	"format": "{icon} {0}",
 	"format-icons": {
@@ -95,107 +100,130 @@ func main() {
 		return
 	}
 
-	lock, err := Flock()
-	if err != nil {
-		return
-	}
-	defer lock.Close()
-
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		slog.Error("Failed to create dbus connection", "error", err)
 		return
 	}
 
-	names, err := mpris.List(conn)
-	if err != nil {
-		slog.Error("Failed to find list of player", "error", err)
-		return
-	}
-
-	searchTerm := "spotify"
-	var playerName string
-	for _, name := range names {
-		if strings.Contains(strings.ToLower(name), strings.ToLower(searchTerm)) {
-			playerName = name
-			break
-		}
-	}
-
-	if playerName == "" {
-		slog.Error("Can't find supported player", "error", err)
-		return
-	}
-
-	slog.Info("Player selected", "name", playerName)
-	player := mpris.New(conn, playerName)
+	player := mpris.New(conn, PlayerName)
 
 	if *toggleState {
 		slog.Info("Toggling player state")
 		if err := player.PlayPause(); err != nil {
 			slog.Error("Failed to toggle player state", "error", err)
 		}
+		return
+	}
 
-		if err := UpdateWaybar(); err != nil {
-			slog.Error("Failed to update waybar through signals", "error", err)
+	var lastInfo *PlayerInfo = nil
+	var lastLine *LyricLine = nil
+	playerOpened := true
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		cancel()
+	}()
+
+	psChan := make(chan *dbus.Signal, 0)
+	player.OnSignal(psChan)
+
+	// Main loop
+	ticker := time.NewTicker(SleepTime)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return // Clean exit on cancel
+		case <-psChan:
+			slog.Debug("Received player update signal")
+		case <-ticker.C:
 		}
-		return
-	}
 
-	info, err := GetSpotifyInfo(player)
-	if err != nil {
-		slog.Error("Failed to parse dbus mpris metadata", "error", err)
-		return
-	}
-
-	slog.Info("Player media found", "title", info.Title, "artist", info.Artist)
-
-	if info.Status == mpris.PlaybackStopped {
-		slog.Info("Player is stopped")
-		return
-	}
-
-	if info.Status == mpris.PlaybackPaused {
-		info.Waybar().Encode()
-		return
-	}
-
-	lyrics, err := FetchLyrics(info)
-	if err != nil {
-		slog.Error("Failed to get lyrics", "error", err)
-		info.Waybar().Encode()
-		return
-	}
-
-	var idx int
-	for i, line := range lyrics {
-		if info.Position < line.Timestamp {
-			break
-		}
-		idx = i
-	}
-
-	currentLine := lyrics[idx].Text
-
-	if currentLine != "" {
-		start := max(idx-2, 0)
-		end := min(idx+5, len(lyrics))
-
-		tooltipLyrics := lyrics[start:end]
-		var tooltip strings.Builder
-		for i, ttl := range tooltipLyrics {
-			lineText := ttl.Text
-			if start+i == idx {
-				tooltip.WriteString("> ")
+		if _, err := player.GetPosition(); err != nil {
+			if playerOpened {
+				slog.Error("Player not found!", "error", err)
+				fmt.Println("{}")
+				playerOpened = false
 			}
-			tooltip.WriteString(lineText + "\n")
+			continue
+		} else {
+			playerOpened = true
 		}
 
-		line := truncate(currentLine, *maxLineLength)
-		tt := strings.TrimSpace(tooltip.String())
-		NewWaybarLyrics(line, tt, info.Percentage()).Encode()
-		return
-	}
+		info, err := GetSpotifyInfo(player)
+		if err != nil {
+			slog.Error("Failed to parse dbus mpris metadata", "error", err)
+			fmt.Println("{}")
+			continue
+		}
 
-	info.Waybar().Encode()
+		playerUpdated := lastInfo == nil || lastInfo.ID != info.ID || lastInfo.Status != info.Status
+
+		if playerUpdated {
+			slog.Info("Player media found", "title", info.Title, "artist", info.Artist, "status", info.Status)
+			lastInfo = info
+		}
+
+		if info.Status == mpris.PlaybackStopped {
+			slog.Info("Player is stopped")
+			fmt.Println("{}")
+			continue
+		}
+
+		if info.Status == mpris.PlaybackPaused {
+			if playerUpdated {
+				info.Waybar().Encode()
+				lastLine = nil
+			}
+			continue
+		}
+
+		lyrics, err := FetchLyrics(info)
+		if err != nil {
+			slog.Error("Failed to get lyrics", "error", err)
+			info.Waybar().Encode()
+			continue
+		}
+
+		var idx int
+		for i, line := range lyrics {
+			if info.Position <= line.Timestamp {
+				break
+			}
+			idx = i
+		}
+
+		lyric := lyrics[idx]
+		if lyric.Text != "" {
+			if lastLine != nil && lastLine.Timestamp == lyric.Timestamp {
+				continue
+			}
+			lastLine = &lyric
+
+			slog.Info("Lyrics", "line", lyric.Text)
+			NewWaybar(lyrics, idx, info.Percentage(), *maxLineLength).Encode()
+
+			if len(lyrics) > idx+1 {
+				n := lyrics[idx+1]
+				d := n.Timestamp - info.Position
+				slog.Debug("Sleep", "duration", d.String(), "position", info.Position.String(), "next", n.Timestamp.String())
+				ticker.Reset(d)
+			} else {
+				ticker.Reset(SleepTime)
+			}
+			continue
+		}
+
+		if playerUpdated {
+			info.Waybar().Encode()
+			ticker.Reset(SleepTime)
+		}
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Pauloo27/go-mpris"
@@ -36,12 +37,28 @@ type Waybar struct {
 	Percentage int         `json:"percentage"`
 }
 
-func NewWaybarLyrics(line, tooltip string, percentage int) *Waybar {
+func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
+	lyric := lyrics[idx]
+	start := max(idx-2, 0)
+	end := min(idx+5, len(lyrics))
+
+	tooltipLyrics := lyrics[start:end]
+	var tooltip strings.Builder
+	for i, ttl := range tooltipLyrics {
+		lineText := ttl.Text
+		if start+i == idx {
+			tooltip.WriteString("> ")
+		}
+		tooltip.WriteString(lineText + "\n")
+	}
+
+	line := truncate(lyric.Text, maxLineLength)
+	tt := strings.TrimSpace(tooltip.String())
+
 	return &Waybar{
-		Alt:        "lyric",
-		Class:      "lyric",
+		Alt: "lyric", Class: "lyric",
 		Text:       line,
-		Tooltip:    tooltip,
+		Tooltip:    tt,
 		Percentage: percentage,
 	}
 }
