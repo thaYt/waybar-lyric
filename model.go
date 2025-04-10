@@ -29,12 +29,23 @@ type (
 	}
 )
 
+type Status string
+
+const (
+	Music   Status = "music"
+	Lyric   Status = "lyric"
+	Playing Status = "playing"
+	Paused  Status = "paused"
+)
+
+type Class []Status
+
 type Waybar struct {
-	Text       string      `json:"text"`
-	Class      interface{} `json:"class"`
-	Alt        string      `json:"alt"`
-	Tooltip    string      `json:"tooltip"`
-	Percentage int         `json:"percentage"`
+	Text       string `json:"text"`
+	Class      Class  `json:"class"`
+	Alt        Status `json:"alt"`
+	Tooltip    string `json:"tooltip"`
+	Percentage int    `json:"percentage"`
 }
 
 func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
@@ -45,18 +56,22 @@ func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
 	tooltipLyrics := lyrics[start:end]
 	var tooltip strings.Builder
 	for i, ttl := range tooltipLyrics {
-		lineText := ttl.Text
 		if start+i == idx {
 			tooltip.WriteString("> ")
 		}
-		tooltip.WriteString(lineText + "\n")
+		if ttl.Text != "" {
+			tooltip.WriteString(ttl.Text + "\n")
+		} else {
+			tooltip.WriteString("󰝚 \n")
+		}
+
 	}
 
 	line := truncate(lyric.Text, maxLineLength)
 	tt := strings.TrimSpace(tooltip.String())
 
 	return &Waybar{
-		Alt: "lyric", Class: "lyric",
+		Alt: Lyric, Class: Class{Lyric, Playing},
 		Text:       line,
 		Tooltip:    tt,
 		Percentage: percentage,
@@ -86,12 +101,17 @@ func (p *PlayerInfo) Percentage() int {
 }
 
 func (p *PlayerInfo) Waybar() *Waybar {
-	alt := "playing"
+	var alt Status = Playing
 	if p.Status == "Paused" {
-		alt = "paused"
+		alt = Paused
 	}
 
 	text := fmt.Sprintf("%s - %s", p.Artist, p.Title)
 
-	return &Waybar{Class: "info", Text: text, Alt: alt, Percentage: p.Percentage()}
+	return &Waybar{
+		Class:      Class{Playing},
+		Text:       text,
+		Alt:        alt,
+		Percentage: p.Percentage(),
+	}
 }

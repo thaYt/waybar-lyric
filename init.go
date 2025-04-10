@@ -14,10 +14,12 @@ func PrintInit(textLength int) {
 "custom/lyrics": {
 	"return-type": "json",
 	"format": "{icon} {0}",
+	"hide-empty-text": true,
 	"format-icons": {
 		"playing": "",
 		"paused": "",
 		"lyric": "",
+		"music": "󰝚",
 	},
 	"exec-if": "which waybar-lyric",
 	"exec": "waybar-lyric --max-length %d",

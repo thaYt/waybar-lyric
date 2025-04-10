@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -182,7 +183,7 @@ func main() {
 			continue
 		}
 
-		var idx int
+		idx := -1
 		for i, line := range lyrics {
 			if info.Position <= line.Timestamp {
 				break
@@ -190,15 +191,47 @@ func main() {
 			idx = i
 		}
 
-		lyric := lyrics[idx]
-		if lyric.Text != "" {
+		if idx == -1 {
+			if lastLine != nil && lastLine.Timestamp == -1 {
+				continue
+			}
+			lastLine = &LyricLine{Timestamp: -1, Text: ""}
+
+			var tooltip strings.Builder
+			tooltip.WriteString("> 󰝚 \n")
+
+			end := min(5, len(lyrics))
+			tooltipLyrics := lyrics[:end]
+			for _, ttl := range tooltipLyrics {
+				if ttl.Text != "" {
+					tooltip.WriteString(ttl.Text + "\n")
+				} else {
+					tooltip.WriteString("󰝚 \n")
+				}
+			}
+
+			waybar := info.Waybar()
+			waybar.Tooltip = strings.TrimSpace(tooltip.String())
+			waybar.Alt = Music
+			waybar.Class = Class{Playing, Music}
+			waybar.Encode()
+		} else {
+			lyric := lyrics[idx]
 			if lastLine != nil && lastLine.Timestamp == lyric.Timestamp {
 				continue
 			}
 			lastLine = &lyric
 
 			slog.Info("Lyrics", "line", lyric.Text)
-			NewWaybar(lyrics, idx, info.Percentage(), *maxLineLength).Encode()
+
+			waybar := NewWaybar(lyrics, idx, info.Percentage(), *maxLineLength)
+			if lyric.Text != "" {
+				waybar.Encode()
+			} else {
+				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+				waybar.Alt = Music
+				waybar.Encode()
+			}
 
 			if len(lyrics) > idx+1 {
 				n := lyrics[idx+1]
@@ -206,11 +239,7 @@ func main() {
 				slog.Debug("Sleep", "duration", d.String(), "position", info.Position.String(), "next", n.Timestamp.String())
 				lyricTicker.Reset(d)
 			}
-			continue
 		}
 
-		if playerUpdated {
-			info.Waybar().Encode()
-		}
 	}
 }
