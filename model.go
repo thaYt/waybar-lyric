@@ -109,7 +109,7 @@ func (p *PlayerInfo) Waybar() *Waybar {
 	text := fmt.Sprintf("%s - %s", p.Artist, p.Title)
 
 	return &Waybar{
-		Class:      Class{Playing},
+		Class:      Class{alt},
 		Text:       text,
 		Alt:        alt,
 		Percentage: p.Percentage(),
