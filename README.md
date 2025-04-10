@@ -93,10 +93,14 @@ into your Waybar `config.jsonc` file.
 Add to your `style.css`:
 
 ```css
-#custom-spotify {
+#custom-lyrics {
   color: #1db954;
   margin: 0 5px;
   padding: 0 10px;
+}
+
+#custom-lyrics.paused {
+  color: #aaaaaa; /* Set custom color when paused */
 }
 ```
 
