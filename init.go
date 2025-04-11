@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func PrintInit(textLength int) {
+func PrintSnippet() {
 	fmt.Fprintln(os.Stderr, `Put the following object in your waybar config:`)
 
 	snippet := fmt.Sprintf(`
@@ -25,7 +25,7 @@ func PrintInit(textLength int) {
 	"exec": "waybar-lyric --max-length %d",
 	"on-click": "waybar-lyric --toggle",
 },
-`, textLength)
+`, MaxTextLength)
 
 	cmd := exec.Command("which", "bat")
 	if err := cmd.Run(); err == nil {

@@ -48,7 +48,7 @@ type Waybar struct {
 	Percentage int    `json:"percentage"`
 }
 
-func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
+func NewWaybar(lyrics []LyricLine, idx, percentage int) *Waybar {
 	lyric := lyrics[idx]
 	start := max(idx-2, 0)
 	end := min(idx+5, len(lyrics))
@@ -72,7 +72,7 @@ func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
 		}
 	}
 
-	line := truncate(lyric.Text, maxLineLength)
+	line := truncate(lyric.Text)
 	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	return &Waybar{

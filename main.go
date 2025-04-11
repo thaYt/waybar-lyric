@@ -18,35 +18,42 @@ import (
 )
 
 const (
-	MaxLength    = 150
-	SleepTime    = 500 * time.Millisecond
-	PlayerName   = "org.mpris.MediaPlayer2.spotify"
-	TootlipColor = "#cccccc"
+	SleepTime  = 500 * time.Millisecond
+	PlayerName = "org.mpris.MediaPlayer2.spotify"
+	Version    = "waybar-lyric v0.6.3 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
-const Version = "waybar-lyric v0.6.3 (https://github.com/Nadim147c/waybar-lyric)"
+var (
+	PrintInit     = false
+	PrintVersion  = false
+	ToggleState   = false
+	VerboseLog    = false
+	MaxTextLength = 150
+	TootlipColor  = "#cccccc"
+	LogFilePath   = ""
+)
 
-func truncate(input string, limit int) string {
+func truncate(input string) string {
 	r := []rune(input)
 
-	if len(r) <= limit {
+	if len(r) <= MaxTextLength {
 		return input
 	}
 
-	if limit > 3 {
-		return string(r[:limit-3]) + "..."
+	if MaxTextLength > 3 {
+		return string(r[:MaxTextLength-3]) + "..."
 	}
 
-	return string(r[:limit])
+	return string(r[:MaxTextLength])
 }
 
 func main() {
-	init := pflag.Bool("init", false, "Show json snippet for waybar/config.jsonc")
-	toggleState := pflag.Bool("toggle", false, "Toggle player state (pause/resume)")
-	maxLineLength := pflag.Int("max-length", MaxLength, "Maximum lenght of lyrics text")
-	version := pflag.Bool("version", false, "Print the version of waybar-lyric")
-	logLevelF := pflag.BoolP("verbose", "v", false, "Use verbose loggin")
-	logFile := pflag.String("log-file", "", "File to where logs should be save")
+	pflag.BoolVar(&PrintInit, "init", PrintInit, "Show JSON snippet for waybar/config.jsonc")
+	pflag.BoolVar(&PrintVersion, "version", PrintVersion, "Print the version of waybar-lyric")
+	pflag.BoolVar(&ToggleState, "toggle", ToggleState, "Toggle player state (pause/resume)")
+	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
+	pflag.BoolVarP(&VerboseLog, "verbose", "v", VerboseLog, "Use verbose logging")
+	pflag.StringVar(&LogFilePath, "log-file", LogFilePath, "File where logs should be saved")
 
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", os.Args[0])
@@ -57,20 +64,20 @@ func main() {
 
 	pflag.Parse()
 
-	if *version {
+	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)
 		return
 	}
 
 	opts := slogcolor.DefaultOptions
-	if *logLevelF {
+	if VerboseLog {
 		opts.Level = slog.LevelDebug
 	}
 
-	if *logFile != "" {
-		os.MkdirAll(filepath.Dir(*logFile), 0755)
+	if LogFilePath != "" {
+		os.MkdirAll(filepath.Dir(LogFilePath), 0755)
 
-		file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+		file, err := os.OpenFile(LogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
 			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
 			slog.Error("Failed to open log-file", "error", err)
@@ -83,8 +90,8 @@ func main() {
 		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
 	}
 
-	if *init {
-		PrintInit(*maxLineLength)
+	if PrintInit {
+		PrintSnippet()
 		return
 	}
 
@@ -96,7 +103,7 @@ func main() {
 
 	player := mpris.New(conn, PlayerName)
 
-	if *toggleState {
+	if ToggleState {
 		slog.Info("Toggling player state")
 		if err := player.PlayPause(); err != nil {
 			slog.Error("Failed to toggle player state", "error", err)
@@ -226,7 +233,7 @@ func main() {
 
 			slog.Info("Lyrics", "line", lyric.Text)
 
-			waybar := NewWaybar(lyrics, idx, info.Percentage(), *maxLineLength)
+			waybar := NewWaybar(lyrics, idx, info.Percentage())
 			if lyric.Text != "" {
 				waybar.Encode()
 			} else {
