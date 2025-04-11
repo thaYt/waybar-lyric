@@ -4,9 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"time"
 
-	"github.com/Pauloo27/go-mpris"
+	"github.com/Nadim147c/go-mpris"
 )
 
 // StringToMD5 converts a string to its MD5 hash
@@ -27,11 +26,10 @@ func GetSpotifyInfo(player *mpris.Player) (*PlayerInfo, error) {
 		return nil, err
 	}
 
-	pos, err := player.GetPosition()
+	position, err := player.GetPosition()
 	if err != nil {
 		return nil, err
 	}
-	position := time.Duration(pos * float64(time.Second))
 
 	artistList, ok := meta["xesam:artist"].Value().([]string)
 	if !ok || len(artistList) == 0 {
@@ -50,12 +48,10 @@ func GetSpotifyInfo(player *mpris.Player) (*PlayerInfo, error) {
 	}
 
 	album, _ := meta["xesam:album"].Value().(string)
-	length, ok := meta["mpris:length"].Value().(uint64)
-	if !ok || length == 0 {
-		return nil, fmt.Errorf("missing length information")
+	length, err := player.GetLength()
+	if err != nil {
+		return nil, err
 	}
-
-	duration := time.Duration(length) * time.Microsecond
 
 	return &PlayerInfo{
 		ID:       id,
@@ -64,6 +60,6 @@ func GetSpotifyInfo(player *mpris.Player) (*PlayerInfo, error) {
 		Album:    album,
 		Status:   status,
 		Position: position,
-		Length:   duration,
+		Length:   length,
 	}, nil
 }

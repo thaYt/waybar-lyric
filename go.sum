@@ -1,10 +1,9 @@
 github.com/MatusOllah/slogcolor v1.5.0 h1:jL/tcxMxjrZPXUeoHoMnuq700TnPJNVjvdQlGLWie2c=
 github.com/MatusOllah/slogcolor v1.5.0/go.mod h1:5y1H50XuQIBvuYTJlmokWi+4FuPiJN5L7Z0jM4K4bYA=
-github.com/Pauloo27/go-mpris v1.4.0 h1:KWNTZuXeOdOdIVdzwG/JOOZHlveNiMjiSaK0AWi220c=
-github.com/Pauloo27/go-mpris v1.4.0/go.mod h1:+9otYxTLPRTVZ6i2k6VrG1Y0RzMbBXGuEUQM4ZSvjxU=
+github.com/Nadim147c/go-mpris v0.1.0 h1:9dQE+5Oy7csIxi2Q2AxRGNmcQKfF6r4t6ZzfOu+AgpI=
+github.com/Nadim147c/go-mpris v0.1.0/go.mod h1:JwHDIzBwbGcQ/jUFi3Yc45E9/oot9EyjjbHY4dQC/gM=
 github.com/fatih/color v1.16.0 h1:zmkK9Ngbjj+K0yRhTVONQh1p/HknKYSlNT+vZCzyokM=
 github.com/fatih/color v1.16.0/go.mod h1:fL2Sau1YI5c0pdGEVCbKQbLXB6edEj1ZgiY4NijnWvE=
-github.com/godbus/dbus/v5 v5.0.3/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 github.com/godbus/dbus/v5 v5.1.0 h1:4KLkAxT3aOY8Li4FRJe/KvhoNFFxo0m6fNuFUO8QJUk=
 github.com/godbus/dbus/v5 v5.1.0/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

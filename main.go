@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/MatusOllah/slogcolor"
-	"github.com/Pauloo27/go-mpris"
+	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/pflag"
 )

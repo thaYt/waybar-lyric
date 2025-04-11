@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Pauloo27/go-mpris"
+	"github.com/Nadim147c/go-mpris"
 )
 
 type (

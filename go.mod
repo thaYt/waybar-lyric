@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/MatusOllah/slogcolor v1.5.0
-	github.com/Pauloo27/go-mpris v1.4.0
+	github.com/Nadim147c/go-mpris v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/spf13/pflag v1.0.6
 )
