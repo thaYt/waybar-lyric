@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	MaxLength  = 150
-	SleepTime  = 500 * time.Millisecond
-	PlayerName = "org.mpris.MediaPlayer2.spotify"
+	MaxLength    = 150
+	SleepTime    = 500 * time.Millisecond
+	PlayerName   = "org.mpris.MediaPlayer2.spotify"
+	TootlipColor = "#cccccc"
 )
 
 const Version = "waybar-lyric v0.6.3 (https://github.com/Nadim147c/waybar-lyric)"
@@ -198,7 +199,8 @@ func main() {
 			lastLine = &LyricLine{Timestamp: -1, Text: ""}
 
 			var tooltip strings.Builder
-			tooltip.WriteString("> 󰝚 \n")
+			tooltip.WriteString("<b><big>󰝚 </big></b>\n")
+			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TootlipColor))
 
 			end := min(5, len(lyrics))
 			tooltipLyrics := lyrics[:end]
@@ -211,7 +213,7 @@ func main() {
 			}
 
 			waybar := info.Waybar()
-			waybar.Tooltip = strings.TrimSpace(tooltip.String())
+			waybar.Tooltip = strings.TrimSpace(tooltip.String()) + "</span>"
 			waybar.Alt = Music
 			waybar.Class = Class{Playing, Music}
 			waybar.Encode()

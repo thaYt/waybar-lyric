@@ -55,20 +55,25 @@ func NewWaybar(lyrics []LyricLine, idx, percentage, maxLineLength int) *Waybar {
 
 	tooltipLyrics := lyrics[start:end]
 	var tooltip strings.Builder
+
+	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TootlipColor))
+
 	for i, ttl := range tooltipLyrics {
-		if start+i == idx {
-			tooltip.WriteString("> ")
-		}
-		if ttl.Text != "" {
-			tooltip.WriteString(ttl.Text + "\n")
-		} else {
-			tooltip.WriteString("󰝚 \n")
+		line := ttl.Text
+		if ttl.Text == "" {
+			line = "󰝚 "
 		}
 
+		if start+i == idx {
+			newLine := fmt.Sprintf("</span><b><big>%s</big></b>\n<span foreground=\"%s\">", line, TootlipColor)
+			tooltip.WriteString(newLine)
+		} else {
+			tooltip.WriteString(line + "\n")
+		}
 	}
 
 	line := truncate(lyric.Text, maxLineLength)
-	tt := strings.TrimSpace(tooltip.String())
+	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	return &Waybar{
 		Alt: Lyric, Class: Class{Lyric, Playing},
