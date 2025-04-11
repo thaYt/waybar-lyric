@@ -3,7 +3,7 @@
 A CLI tool that displays Spotify lyrics on your
 [Waybar](https://github.com/Alexays/Waybar) for Linux systems.
 
-<video src="https://github.com/user-attachments/assets/e192f75d-7a67-423d-abde-ca5ea160e492" height="360" controls></video>
+<video src="https://github.com/user-attachments/assets/a352dc99-8736-4c34-84f3-7492c607c7f0" height="360" controls></video>
 
 ## Description
 
