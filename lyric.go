@@ -34,7 +34,7 @@ func request(params url.Values, header http.Header) (*http.Response, error) {
 	return client.Do(req)
 }
 
-func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
+func GetLyrics(info *PlayerInfo) ([]LyricLine, error) {
 	uri := filepath.Base(info.ID)
 	uri = strings.ReplaceAll(uri, "/", "-")
 
@@ -43,6 +43,7 @@ func FetchLyrics(info *PlayerInfo) ([]LyricLine, error) {
 			if len(v) == 0 {
 				return v, fmt.Errorf("Lyrics doesn't exists")
 			}
+			slog.Debug("Lyrics found in memory cache", "lines", len(v))
 			return v, nil
 		}
 	}

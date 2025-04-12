@@ -185,7 +185,7 @@ func main() {
 			continue
 		}
 
-		lyrics, err := FetchLyrics(info)
+		lyrics, err := GetLyrics(info)
 		if err != nil {
 			slog.Error("Failed to get lyrics", "error", err)
 			info.Waybar().Encode()
