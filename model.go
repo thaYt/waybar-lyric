@@ -10,25 +10,26 @@ import (
 	"github.com/Nadim147c/go-mpris"
 )
 
-type (
-	LrcLibResponse struct {
-		ID           int     `json:"id"`
-		Name         string  `json:"name"`
-		TrackName    string  `json:"trackName"`
-		ArtistName   string  `json:"artistName"`
-		AlbumName    string  `json:"albumName"`
-		Duration     float64 `json:"duration"`
-		Instrumental bool    `json:"instrumental"`
-		PlainLyrics  string  `json:"plainLyrics"`
-		SyncedLyrics string  `json:"syncedLyrics"`
-	}
+// LrcLibResponse is the response sent from LrcLib api
+type LrcLibResponse struct {
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	TrackName    string  `json:"trackName"`
+	ArtistName   string  `json:"artistName"`
+	AlbumName    string  `json:"albumName"`
+	Duration     float64 `json:"duration"`
+	Instrumental bool    `json:"instrumental"`
+	PlainLyrics  string  `json:"plainLyrics"`
+	SyncedLyrics string  `json:"syncedLyrics"`
+}
 
-	LyricLine struct {
-		Timestamp time.Duration
-		Text      string
-	}
-)
+// LyricLine is a line of synchronized lyrics
+type LyricLine struct {
+	Timestamp time.Duration
+	Text      string
+}
 
+// Status is the alt/class for waybar
 type Status string
 
 const (
