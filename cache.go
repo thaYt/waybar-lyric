@@ -43,16 +43,15 @@ func LoadCache(filePath string) ([]LyricLine, error) {
 			continue // Skip invalid lines
 		}
 
-		timestamp, err := strconv.ParseInt(parts[0], 10, 64)
+		ts, err := strconv.Atoi(parts[0])
 		if err != nil {
 			return nil, err
 		}
 
-		lyric := LyricLine{
-			Timestamp: time.Duration(timestamp),
-			Text:      parts[1],
-		}
+		timestamp := time.Duration(ts)
+		text := strings.TrimSpace(parts[1])
 
+		lyric := LyricLine{Timestamp: timestamp, Text: text}
 		lyrics = append(lyrics, lyric)
 	}
 
