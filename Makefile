@@ -1,3 +1,4 @@
+GO         ?= go
 SRCBIN     ?= ./bin/waybar-lyric
 PREFIX     ?= /usr/local
 BINDIR     ?= $(PREFIX)/bin
@@ -11,7 +12,12 @@ all: build
 # Build the Go binary
 .PHONY: build
 build:
-	go build -trimpath -ldflags "-s -w" -o $(SRCBIN)
+	$(GO) build -x -v -trimpath -ldflags "-s -w" -o $(SRCBIN)
+
+# Build the Go binary
+.PHONY: test
+test:
+	$(GO) test -v -cover .
 
 # Clean up build artifacts
 .PHONY: clean
