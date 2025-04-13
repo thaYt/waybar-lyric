@@ -1,6 +1,6 @@
 module github.com/Nadim147c/waybar-lyric
 
-go 1.23.3
+go 1.24
 
 require (
 	github.com/MatusOllah/slogcolor v1.5.0

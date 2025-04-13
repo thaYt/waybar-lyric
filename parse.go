@@ -10,8 +10,7 @@ import (
 
 func parseLyrics(file string) ([]LyricLine, error) {
 	var lyrics []LyricLine
-	lines := strings.Split(file, "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
 		}
