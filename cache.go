@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ func SaveCache(lines []LyricLine, filePath string) error {
 	}
 	defer file.Close()
 
-	for _, line := range lines {
+	for line := range slices.Values(lines) {
 		_, err := fmt.Fprintf(file, "%d,%s\n", line.Timestamp, line.Text)
 		if err != nil {
 			return err
