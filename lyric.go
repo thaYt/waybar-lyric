@@ -106,7 +106,7 @@ func GetLyrics(info *PlayerInfo) ([]LyricLine, error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	lyrics, err := parseLyrics(resJson.SyncedLyrics)
+	lyrics, err := ParseLyrics(resJson.SyncedLyrics)
 	if err != nil {
 		LyricStore.Store(uri, []LyricLine{})
 		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)

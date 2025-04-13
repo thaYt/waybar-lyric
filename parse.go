@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -8,16 +9,22 @@ import (
 	"time"
 )
 
-func parseLyrics(file string) ([]LyricLine, error) {
+// ParseLyrics parses a string containing time-synchronized lyrics in the format [MM:SS.ss]Lyric text
+// and returns a slice of LyricLine structs. Each line in the input should follow the format
+// "[timestamp]lyric text", where timestamp is in a format parseable by ParseTimestamp.
+// Empty lines and malformed lines are skipped.
+func ParseLyrics(file string) ([]LyricLine, error) {
 	var lyrics []LyricLine
 	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
 		}
+
 		parts := strings.SplitN(line, "]", 2)
 		if len(parts) != 2 {
 			continue
 		}
+
 		timestampStr := strings.TrimPrefix(parts[0], "[")
 		lyricLine := strings.TrimSpace(parts[1])
 
@@ -26,13 +33,14 @@ func parseLyrics(file string) ([]LyricLine, error) {
 			continue
 		}
 
-		lyric := LyricLine{
-			Timestamp: timestamp,
-			Text:      lyricLine,
-		}
-
+		lyric := LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
 	}
+
+	if len(lyrics) == 0 {
+		return lyrics, errors.New("Lyric lines are 0")
+	}
+
 	return lyrics, nil
 }
 
