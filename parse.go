@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -21,7 +21,7 @@ func parseLyrics(file string) ([]LyricLine, error) {
 		timestampStr := strings.TrimPrefix(parts[0], "[")
 		lyricLine := strings.TrimSpace(parts[1])
 
-		timestamp, err := parseTimestamp(timestampStr)
+		timestamp, err := ParseTimestamp(timestampStr)
 		if err != nil {
 			continue
 		}
@@ -36,19 +36,31 @@ func parseLyrics(file string) ([]LyricLine, error) {
 	return lyrics, nil
 }
 
-func parseTimestamp(ts string) (time.Duration, error) {
+// ParseTimestamp converts a timestamp string (in "HH:MM:SS", "MM:SS" or "SS" format)
+// into a time.Duration value representing the total number of nanoseconds.
+// Example inputs: "1:30:45" (1h 30m 45s), "5:20" (5m 20s), "42" (42s)
+func ParseTimestamp(ts string) (time.Duration, error) {
+	durationConst := []time.Duration{time.Second, time.Minute, time.Hour}
+
+	var duration time.Duration
+
 	parts := strings.Split(ts, ":")
+	if len(parts) > 3 {
+		return 0, fmt.Errorf("invalid timestamp: %s", ts)
+	}
 
-	var seconds time.Duration
+	// Reverse parts to process seconds first, then minutes, then hours
+	// This allows us to handle variable-length timestamps (SS, MM:SS, HH:MM:SS)
+	slices.Reverse(parts)
 
-	for i := len(parts) - 1; i >= 0; i-- {
-		part, err := strconv.ParseFloat(strings.TrimSpace(parts[i]), 64)
-		if err != nil {
+	for i, part := range parts {
+		num, err := strconv.ParseFloat(strings.TrimSpace(part), 64)
+		if err != nil || num < 0 {
 			return 0, fmt.Errorf("invalid timestamp part: %s", parts[i])
 		}
 
-		seconds += time.Duration(part * math.Pow(60, float64(len(parts)-1-i)) * float64(time.Second))
+		duration += time.Duration(num * float64(durationConst[i]))
 	}
 
-	return seconds, nil
+	return duration, nil
 }
