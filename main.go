@@ -119,10 +119,6 @@ func main() {
 		return
 	}
 
-	var lastInfo *PlayerInfo = nil
-	var lastLine *LyricLine = nil
-	playerOpened := true
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -142,6 +138,12 @@ func main() {
 	// Main loop
 	fixedTicker := time.NewTicker(SleepTime)
 	defer fixedTicker.Stop()
+
+	var lastInfo *PlayerInfo = nil
+	var lastLine *LyricLine = nil
+	var lyricsNotFound bool
+
+	playerOpened := true
 
 	for {
 		select {
@@ -194,10 +196,14 @@ func main() {
 
 		lyrics, err := GetLyrics(info)
 		if err != nil {
-			slog.Error("Failed to get lyrics", "error", err)
-			info.Waybar().Encode()
+			if !lyricsNotFound {
+				slog.Error("Failed to get lyrics", "error", err)
+				info.Waybar().Encode()
+				lyricsNotFound = true
+			}
 			continue
 		}
+		lyricsNotFound = false
 
 		idx := -1
 		for i, line := range lyrics {
