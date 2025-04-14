@@ -45,13 +45,6 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 		return val, nil
 	}
 
-	notFoundTempDir := filepath.Join(os.TempDir(), "waybar-lyric")
-	lyricsNotFoundFile := filepath.Join(notFoundTempDir, uri+"-not-found")
-
-	if _, err := os.Stat(lyricsNotFoundFile); err == nil {
-		return nil, fmt.Errorf("Lyrics not found (cached)")
-	}
-
 	userCacheDir, _ := os.UserCacheDir()
 	cacheDir := filepath.Join(userCacheDir, "waybar-lyric")
 
@@ -85,13 +78,11 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	if resp.StatusCode == http.StatusNotFound {
 		LyricStore.Save(uri, []LyricLine{})
-		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("Lyrics not found")
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		LyricStore.Save(uri, []LyricLine{})
-		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
@@ -99,20 +90,17 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	err = json.NewDecoder(resp.Body).Decode(&resJson)
 	if err != nil {
 		LyricStore.Save(uri, []LyricLine{})
-		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	lyrics, err := ParseLyrics(resJson.SyncedLyrics)
 	if err != nil {
 		LyricStore.Save(uri, []LyricLine{})
-		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
 	if len(lyrics) == 0 {
 		LyricStore.Save(uri, []LyricLine{})
-		os.WriteFile(lyricsNotFoundFile, []byte(resp.Request.URL.String()), 644)
 		return nil, fmt.Errorf("failed to find sync lyrics lines")
 	}
 
