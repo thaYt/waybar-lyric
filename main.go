@@ -29,6 +29,7 @@ var (
 	ToggleState   = false
 	VerboseLog    = false
 	MaxTextLength = 150
+	TooltipLines  = 8
 	TootlipColor  = "#cccccc"
 	LogFilePath   = ""
 )
@@ -52,6 +53,7 @@ func main() {
 	pflag.BoolVar(&PrintVersion, "version", PrintVersion, "Print the version of waybar-lyric")
 	pflag.BoolVar(&ToggleState, "toggle", ToggleState, "Toggle player state (pause/resume)")
 	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
+	pflag.IntVar(&TooltipLines, "tooltip-lines", TooltipLines, "Maximum lines of waybar tooltip")
 	pflag.StringVarP(&TootlipColor, "tooltip-color", "t", TootlipColor, "Maximum length of lyrics text")
 	pflag.BoolVarP(&VerboseLog, "verbose", "v", VerboseLog, "Use verbose logging")
 	pflag.StringVar(&LogFilePath, "log-file", LogFilePath, "File where logs should be saved")
@@ -64,6 +66,11 @@ func main() {
 	}
 
 	pflag.Parse()
+
+	if TooltipLines < 4 {
+		fmt.Fprintln(os.Stderr, "Tooltip lines limit must be at least 4")
+		return
+	}
 
 	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)
@@ -210,7 +217,7 @@ func main() {
 			tooltip.WriteString("<b><big>󰝚 </big></b>\n")
 			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TootlipColor))
 
-			end := min(5, len(lyrics))
+			end := min(TooltipLines, len(lyrics))
 			tooltipLyrics := lyrics[:end]
 			for _, ttl := range tooltipLyrics {
 				if ttl.Text != "" {

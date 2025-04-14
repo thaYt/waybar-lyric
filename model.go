@@ -55,7 +55,7 @@ type Waybar struct {
 func NewWaybar(lyrics []LyricLine, idx, percentage int) *Waybar {
 	lyric := lyrics[idx]
 	start := max(idx-2, 0)
-	end := min(idx+5, len(lyrics))
+	end := min(idx+TooltipLines-2, len(lyrics))
 
 	tooltipLyrics := lyrics[start:end]
 	var tooltip strings.Builder
