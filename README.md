@@ -18,6 +18,7 @@ desktop music experience.
 - Smart caching system:
   - Stores available lyrics locally to reduce API requests
   - Remembers songs without lyrics to prevent unnecessary API calls
+- Custom waybar tooltip
 - Configurable maximum text length
 - Detailed logging options
 
@@ -66,12 +67,14 @@ Usage: /usr/bin/waybar-lyric [options]
 Get spotify lyrics on waybar.
 
 Options:
-  --init              Show json snippet for waybar/config.jsonc
-  --log-file string   File to where logs should be save
-  --max-length int    Maximum lenght of lyrics text (default 150)
-  --toggle            Toggle player state (pause/resume)
-  -v, --verbose       Use verbose loggin
-  --version           Print the version of waybar-lyric
+      --init                   Show JSON snippet for waybar/config.jsonc
+      --log-file string        File where logs should be saved
+      --max-length int         Maximum length of lyrics text (default 150)
+      --toggle                 Toggle player state (pause/resume)
+  -t, --tooltip-color string   Maximum length of lyrics text (default "#cccccc")
+      --tooltip-lines int      Maximum lines of waybar tooltip (default 8)
+  -v, --verbose                Use verbose logging
+      --version                Print the version of waybar-lyric
 ```
 
 ## Configuration
