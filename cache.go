@@ -3,12 +3,30 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var CacheDir string
+
+func init() {
+	userCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		slog.Error("Failed to find cache directory", "error", err)
+		return
+	}
+
+	CacheDir = filepath.Join(userCacheDir, "waybar-lyric")
+
+	if err := os.MkdirAll(CacheDir, 0755); err != nil {
+		slog.Error("Failed to create cache directory")
+	}
+}
 
 func SaveCache(lines []LyricLine, filePath string) error {
 	file, err := os.Create(filePath)

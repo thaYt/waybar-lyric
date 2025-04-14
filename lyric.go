@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -45,10 +44,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 		return val, nil
 	}
 
-	userCacheDir, _ := os.UserCacheDir()
-	cacheDir := filepath.Join(userCacheDir, "waybar-lyric")
-
-	cacheFile := filepath.Join(cacheDir, uri+".csv")
+	cacheFile := filepath.Join(CacheDir, uri+".csv")
 
 	if cachedLyrics, err := LoadCache(cacheFile); err == nil {
 		LyricStore.Save(uri, cachedLyrics)
@@ -108,12 +104,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
 	})
 
-	if err := os.MkdirAll(cacheDir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create cache directory: %w", err)
-	}
-
-	err = SaveCache(lyrics, cacheFile)
-	if err != nil {
+	if err = SaveCache(lyrics, cacheFile); err != nil {
 		return nil, fmt.Errorf("failed to cache lyrics to psudo csv: %w", err)
 	}
 
