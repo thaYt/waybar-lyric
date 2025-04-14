@@ -29,6 +29,9 @@ type LyricLine struct {
 	Text      string
 }
 
+// Lyrics is a slice of LyricLine
+type Lyrics []LyricLine
+
 // Status is the alt/class for waybar
 type Status string
 
@@ -120,4 +123,17 @@ func (p *PlayerInfo) Waybar() *Waybar {
 		Alt:        alt,
 		Percentage: p.Percentage(),
 	}
+}
+
+type Store map[string]Lyrics
+
+// Save saves lyrics to Store
+func (s Store) Save(key string, value Lyrics) {
+	s[key] = value
+}
+
+// Load loads lyrics from Store
+func (s Store) Load(key string) (Lyrics, bool) {
+	v, e := s[key]
+	return v, e
 }
