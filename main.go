@@ -20,7 +20,7 @@ import (
 const (
 	SleepTime  = 500 * time.Millisecond
 	PlayerName = "org.mpris.MediaPlayer2.spotify"
-	Version    = "waybar-lyric v0.7.0 (https://github.com/Nadim147c/waybar-lyric)"
+	Version    = "waybar-lyric v0.8.0 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
 var (
