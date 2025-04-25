@@ -12,7 +12,7 @@ all: build
 # Build the Go binary
 .PHONY: build
 build:
-	$(GO) build -x -v -trimpath -ldflags "-s -w" -o $(SRCBIN)
+	$(GO) build -v -trimpath -ldflags "-s -w" -o $(SRCBIN)
 
 # Build the Go binary
 .PHONY: test
