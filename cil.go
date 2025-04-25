@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/MatusOllah/slogcolor"
+	"github.com/fatih/color"
 	"github.com/spf13/pflag"
 )
 
@@ -41,6 +42,12 @@ func init() {
 	pflag.Parse()
 
 	opts := slogcolor.DefaultOptions
+	opts.LevelTags = map[slog.Level]string{
+		slog.LevelDebug: color.New(color.FgGreen).Sprint("DEBUG"),
+		slog.LevelInfo:  color.New(color.FgCyan).Sprint("INFO "),
+		slog.LevelWarn:  color.New(color.FgYellow).Sprint("WARN "),
+		slog.LevelError: color.New(color.FgRed).Sprint("ERROR"),
+	}
 
 	if VerboseLog {
 		opts.Level = slog.LevelDebug
