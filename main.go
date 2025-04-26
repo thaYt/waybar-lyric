@@ -15,9 +15,8 @@ import (
 )
 
 const (
-	SleepTime  = 500 * time.Millisecond
-	PlayerName = "org.mpris.MediaPlayer2.spotify"
-	Version    = "waybar-lyric v0.8.0 (https://github.com/Nadim147c/waybar-lyric)"
+	SleepTime = 500 * time.Millisecond
+	Version   = "waybar-lyric v0.8.0 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
 func truncate(input string) string {
@@ -56,7 +55,15 @@ func main() {
 		return
 	}
 
-	player := mpris.New(conn, PlayerName)
+	var player *mpris.Player
+	for player == nil {
+		p, _, err := SelectPlayer(conn)
+		if err == nil {
+			slog.Debug("Failed to select player", "error", err)
+			player = p
+		}
+	}
+	slog.Debug("Player selected", "player", player)
 
 	if ToggleState {
 		slog.Info("Toggling player state")
@@ -102,7 +109,8 @@ func main() {
 		case <-fixedTicker.C:
 		}
 
-		if _, err := player.GetPosition(); err != nil {
+		player, parser, err := SelectPlayer(conn)
+		if err != nil {
 			if playerOpened {
 				slog.Error("Player not found!", "error", err)
 				fmt.Println("{}")
@@ -113,12 +121,21 @@ func main() {
 			playerOpened = true
 		}
 
-		info, err := GetSpotifyInfo(player)
+		info, err := parser(player)
 		if err != nil {
 			slog.Error("Failed to parse dbus mpris metadata", "error", err)
 			fmt.Println("{}")
 			continue
 		}
+
+		slog.Debug("PlayerInfo",
+			"id", info.ID,
+			"title", info.Title,
+			"artist", info.Artist,
+			"album", info.Album,
+			"position", info.Position.String(),
+			"length", info.Length.String(),
+		)
 
 		playerUpdated := lastInfo == nil || lastInfo.ID != info.ID || lastInfo.Status != info.Status
 
