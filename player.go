@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
+	"strings"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
@@ -14,8 +16,9 @@ import (
 type PlayerParser func(*mpris.Player) (*PlayerInfo, error)
 
 var supportedPlayers = map[string]PlayerParser{
-	"spotify": DefaultParser,
-	"amarok":  DefaultParser,
+	"spotify":          DefaultParser,
+	"amarok":           DefaultParser,
+	"io.bassi.Amberol": AmberolParser,
 }
 
 func SelectPlayer(conn *dbus.Conn) (*mpris.Player, PlayerParser, error) {
@@ -23,6 +26,7 @@ func SelectPlayer(conn *dbus.Conn) (*mpris.Player, PlayerParser, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	slog.Debug("Player names", "players", players)
 
 	if len(players) == 0 {
 		return nil, nil, errors.New("No player exists")
@@ -51,6 +55,9 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
 		return nil, err
+	}
+	for k, v := range meta {
+		slog.Debug("MPRIS", k, v)
 	}
 
 	status, err := player.GetPlaybackStatus()
@@ -94,4 +101,19 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		Position: position,
 		Length:   length,
 	}, nil
+}
+
+func AmberolParser(player *mpris.Player) (*PlayerInfo, error) {
+	info, err := DefaultParser(player)
+	if err != nil {
+		return nil, err
+	}
+
+	artsts := strings.Split(info.Artist, ";")
+	if len(artsts) == 0 {
+		return info, nil
+	}
+
+	info.Artist = artsts[0]
+	return info, nil
 }
