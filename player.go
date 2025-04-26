@@ -40,8 +40,7 @@ func SelectPlayer(conn *dbus.Conn) (*mpris.Player, PlayerParser, error) {
 		}
 	}
 
-	playerName := players[0]
-	return mpris.New(conn, playerName), DefaultParser, nil
+	return nil, nil, errors.New("No player exists")
 }
 
 // StringToMD5 converts a string to its MD5 hash
