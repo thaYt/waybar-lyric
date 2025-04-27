@@ -28,7 +28,7 @@ func init() {
 	pflag.BoolVar(&ToggleState, "toggle", ToggleState, "Toggle player state (pause/resume)")
 	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
 	pflag.IntVar(&TooltipLines, "tooltip-lines", TooltipLines, "Maximum lines of waybar tooltip")
-	pflag.StringVarP(&TootlipColor, "tooltip-color", "t", TootlipColor, "Maximum length of lyrics text")
+	pflag.StringVarP(&TootlipColor, "tooltip-color", "t", TootlipColor, "Color of inactive lyrics lines")
 	pflag.BoolVarP(&VerboseLog, "verbose", "v", VerboseLog, "Use verbose logging")
 	pflag.StringVar(&LogFilePath, "log-file", LogFilePath, "File where logs should be saved")
 
