@@ -34,7 +34,7 @@ func init() {
 
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", os.Args[0])
-		fmt.Fprint(os.Stderr, "Get spotify lyrics on waybar.\n\n")
+		fmt.Fprint(os.Stderr, "Get lyrics on waybar.\n\n")
 		fmt.Println("Options:")
 		fmt.Println(pflag.CommandLine.FlagUsages())
 	}
