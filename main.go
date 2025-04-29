@@ -16,7 +16,7 @@ import (
 
 const (
 	SleepTime = 500 * time.Millisecond
-	Version   = "waybar-lyric v0.9.0 (https://github.com/Nadim147c/waybar-lyric)"
+	Version   = "waybar-lyric v0.10.0 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
 func truncate(input string) string {
