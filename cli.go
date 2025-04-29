@@ -12,14 +12,17 @@ import (
 )
 
 var (
-	PrintInit     = false
-	PrintVersion  = false
-	ToggleState   = false
-	VerboseLog    = false
-	MaxTextLength = 150
-	TooltipLines  = 8
-	TooltipColor  = "#cccccc"
-	LogFilePath   = ""
+	PrintInit       = false
+	PrintVersion    = false
+	ToggleState     = false
+	VerboseLog      = false
+	MaxTextLength   = 150
+	TooltipLines    = 8
+	TooltipColor    = "#cccccc"
+	FilterProfanity = false
+	LogFilePath     = ""
+
+	FilterProfanityType = ""
 )
 
 func init() {
@@ -29,6 +32,7 @@ func init() {
 	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
 	pflag.IntVar(&TooltipLines, "tooltip-lines", TooltipLines, "Maximum lines of waybar tooltip")
 	pflag.StringVarP(&TooltipColor, "tooltip-color", "t", TooltipColor, "Color of inactive lyrics lines")
+	pflag.StringVarP(&FilterProfanityType, "filter-profanity", "f", FilterProfanityType, "Filter profanity from lyrics (full or partial)")
 	pflag.BoolVarP(&VerboseLog, "verbose", "v", VerboseLog, "Use verbose logging")
 	pflag.StringVar(&LogFilePath, "log-file", LogFilePath, "File where logs should be saved")
 
@@ -40,6 +44,16 @@ func init() {
 	}
 
 	pflag.Parse()
+
+	switch FilterProfanityType {
+	case "":
+		FilterProfanity = false
+	case "full", "partial":
+		FilterProfanity = true
+	default:
+		fmt.Fprintln(os.Stderr, "Profanity filter must one of 'full' or 'partial'")
+		os.Exit(1)
+	}
 
 	opts := slogcolor.DefaultOptions
 	opts.LevelTags = map[slog.Level]string{

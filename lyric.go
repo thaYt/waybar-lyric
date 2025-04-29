@@ -32,6 +32,14 @@ func request(params url.Values, header http.Header) (*http.Response, error) {
 	return client.Do(req)
 }
 
+func CensorLyrics(lyrics Lyrics) {
+	if FilterProfanity {
+		for i, l := range lyrics {
+			lyrics[i].Text = CensorText(l.Text, FilterProfanityType)
+		}
+	}
+}
+
 func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	uri := filepath.Base(info.ID)
 	uri = strings.ReplaceAll(uri, "/", "-")
@@ -47,6 +55,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	cacheFile := filepath.Join(CacheDir, uri+".csv")
 
 	if cachedLyrics, err := LoadCache(cacheFile); err == nil {
+		CensorLyrics(cachedLyrics)
 		LyricStore.Save(uri, cachedLyrics)
 		return cachedLyrics, nil
 	} else {
@@ -108,7 +117,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 		return nil, fmt.Errorf("failed to cache lyrics to psudo csv: %w", err)
 	}
 
+	CensorLyrics(lyrics)
 	LyricStore.Save(uri, lyrics)
-
 	return lyrics, nil
 }
