@@ -185,7 +185,7 @@ func main() {
 
 			var tooltip strings.Builder
 			tooltip.WriteString("<b><big>󰝚 </big></b>\n")
-			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TootlipColor))
+			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
 
 			end := min(TooltipLines, len(lyrics))
 			tooltipLyrics := lyrics[:end]
