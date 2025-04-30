@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -88,9 +89,17 @@ func NewWaybar(lyrics []LyricLine, idx, percentage int) *Waybar {
 }
 
 func (w *Waybar) Encode() {
+	if w == (&Waybar{}) {
+		fmt.Println("{}")
+	}
+
 	e := json.NewEncoder(os.Stdout)
 	e.SetEscapeHTML(false)
 	e.Encode(w)
+}
+
+func (w *Waybar) Is(waybar *Waybar) bool {
+	return reflect.DeepEqual(w, waybar)
 }
 
 type PlayerInfo struct {

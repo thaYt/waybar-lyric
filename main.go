@@ -88,11 +88,7 @@ func main() {
 	fixedTicker := time.NewTicker(SleepTime)
 	defer fixedTicker.Stop()
 
-	var lastInfo *PlayerInfo = nil
-	var lastLine *LyricLine = nil
-	var lyricsNotFound bool
-
-	playerOpened := true
+	var lastWaybar *Waybar = nil
 
 	for {
 		select {
@@ -106,20 +102,25 @@ func main() {
 
 		player, parser, err := SelectPlayer(conn)
 		if err != nil {
-			if playerOpened {
-				slog.Error("Player not found!", "error", err)
-				fmt.Println("{}")
-				playerOpened = false
+			slog.Error("Player not found!", "error", err)
+
+			waybar := &Waybar{}
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
 			}
+
 			continue
-		} else {
-			playerOpened = true
 		}
 
 		info, err := parser(player)
 		if err != nil {
 			slog.Error("Failed to parse dbus mpris metadata", "error", err)
-			fmt.Println("{}")
+			waybar := &Waybar{}
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
+			}
 			continue
 		}
 
@@ -132,37 +133,36 @@ func main() {
 			"length", info.Length.String(),
 		)
 
-		playerUpdated := lastInfo == nil || lastInfo.ID != info.ID || lastInfo.Status != info.Status
-
-		if playerUpdated {
-			slog.Info("Player media found", "title", info.Title, "artist", info.Artist, "status", info.Status)
-			lastInfo = info
-		}
-
 		if info.Status == mpris.PlaybackStopped {
 			slog.Info("Player is stopped")
-			fmt.Println("{}")
+			waybar := &Waybar{}
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
+			}
 			continue
 		}
 
 		if info.Status == mpris.PlaybackPaused {
-			if playerUpdated {
-				info.Waybar().Encode()
-				lastLine = nil
+			waybar := &Waybar{}
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
 			}
 			continue
 		}
 
 		lyrics, err := GetLyrics(info)
 		if err != nil {
-			if !lyricsNotFound {
-				slog.Error("Failed to get lyrics", "error", err)
-				info.Waybar().Encode()
-				lyricsNotFound = true
+			slog.Error("Failed to get lyrics", "error", err)
+			waybar := info.Waybar()
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
 			}
+
 			continue
 		}
-		lyricsNotFound = false
 
 		idx := -1
 		for i, line := range lyrics {
@@ -173,11 +173,6 @@ func main() {
 		}
 
 		if idx == -1 {
-			if lastLine != nil && lastLine.Timestamp == -1 {
-				continue
-			}
-			lastLine = &LyricLine{Timestamp: -1, Text: ""}
-
 			var tooltip strings.Builder
 			tooltip.WriteString("<b><big>󰝚 </big></b>\n")
 			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
@@ -196,23 +191,24 @@ func main() {
 			waybar.Tooltip = strings.TrimSpace(tooltip.String()) + "</span>"
 			waybar.Alt = Music
 			waybar.Class = Class{Playing, Music}
-			waybar.Encode()
+
+			if !waybar.Is(lastWaybar) {
+				waybar.Encode()
+				lastWaybar = waybar
+			}
 		} else {
 			lyric := lyrics[idx]
-			if lastLine != nil && lastLine.Timestamp == lyric.Timestamp {
-				continue
-			}
-			lastLine = &lyric
-
-			slog.Info("Lyrics", "line", lyric.Text)
 
 			waybar := NewWaybar(lyrics, idx, info.Percentage())
-			if lyric.Text != "" {
-				waybar.Encode()
-			} else {
+			if lyric.Text == "" {
 				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
 				waybar.Alt = Music
+			}
+
+			if !waybar.Is(lastWaybar) {
+				slog.Info("Lyrics", "line", lyric.Text)
 				waybar.Encode()
+				lastWaybar = waybar
 			}
 
 			if len(lyrics) > idx+1 {
