@@ -46,14 +46,13 @@ const (
 type Class []Status
 
 type Waybar struct {
-	Text       string `json:"text"`
-	Class      Class  `json:"class"`
-	Alt        Status `json:"alt"`
-	Tooltip    string `json:"tooltip"`
-	Percentage int    `json:"percentage"`
+	Text    string `json:"text"`
+	Class   Class  `json:"class"`
+	Alt     Status `json:"alt"`
+	Tooltip string `json:"tooltip"`
 }
 
-func NewWaybar(lyrics []LyricLine, idx, percentage int) *Waybar {
+func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	lyric := lyrics[idx]
 	start := max(idx-2, 0)
 	end := min(idx+TooltipLines-2, len(lyrics))
@@ -80,12 +79,8 @@ func NewWaybar(lyrics []LyricLine, idx, percentage int) *Waybar {
 	line := truncate(lyric.Text)
 	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
-	return &Waybar{
-		Alt: Lyric, Class: Class{Lyric, Playing},
-		Text:       line,
-		Tooltip:    tt,
-		Percentage: percentage,
-	}
+	class := Class{Lyric, Playing}
+	return &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
 }
 
 func (w *Waybar) Encode() {
@@ -114,10 +109,6 @@ type PlayerInfo struct {
 	Status mpris.PlaybackStatus
 }
 
-func (p *PlayerInfo) Percentage() int {
-	return int((p.Position * 100) / p.Length)
-}
-
 func (p *PlayerInfo) Waybar() *Waybar {
 	var alt Status = Playing
 	if p.Status == "Paused" {
@@ -126,12 +117,7 @@ func (p *PlayerInfo) Waybar() *Waybar {
 
 	text := fmt.Sprintf("%s - %s", p.Artist, p.Title)
 
-	return &Waybar{
-		Class:      Class{alt},
-		Text:       text,
-		Alt:        alt,
-		Percentage: p.Percentage(),
-	}
+	return &Waybar{Class: Class{alt}, Text: text, Alt: alt}
 }
 
 type Store map[string]Lyrics

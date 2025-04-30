@@ -199,7 +199,7 @@ func main() {
 		} else {
 			lyric := lyrics[idx]
 
-			waybar := NewWaybar(lyrics, idx, info.Percentage())
+			waybar := NewWaybar(lyrics, idx)
 			if lyric.Text == "" {
 				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
 				waybar.Alt = Music
