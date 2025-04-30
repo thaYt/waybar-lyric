@@ -218,7 +218,19 @@ func main() {
 			if len(lyrics) > idx+1 {
 				n := lyrics[idx+1]
 				d := n.Timestamp - info.Position
-				slog.Debug("Sleep", "duration", d.String(), "position", info.Position.String(), "next", n.Timestamp.String())
+				if d <= 0 {
+					slog.Warn("Negative sleep time",
+						"duration", d.String(),
+						"position", info.Position.String(),
+						"next", n.Timestamp.String(),
+					)
+					continue
+				}
+				slog.Debug("Sleep",
+					"duration", d.String(),
+					"position", info.Position.String(),
+					"next", n.Timestamp.String(),
+				)
 				lyricTicker.Reset(d)
 			}
 		}
