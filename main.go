@@ -143,15 +143,6 @@ func main() {
 			continue
 		}
 
-		if info.Status == mpris.PlaybackPaused {
-			waybar := &Waybar{}
-			if !waybar.Is(lastWaybar) {
-				waybar.Encode()
-				lastWaybar = waybar
-			}
-			continue
-		}
-
 		lyrics, err := GetLyrics(info)
 		if err != nil {
 			slog.Error("Failed to get lyrics", "error", err)
@@ -192,6 +183,16 @@ func main() {
 			waybar.Alt = Music
 			waybar.Class = Class{Playing, Music}
 
+			if info.Status == mpris.PlaybackPaused {
+				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+				waybar.Alt = Paused
+				waybar.Class = Class{Paused}
+				if !waybar.Is(lastWaybar) {
+					waybar.Encode()
+					lastWaybar = waybar
+				}
+			}
+
 			if !waybar.Is(lastWaybar) {
 				waybar.Encode()
 				lastWaybar = waybar
@@ -200,6 +201,18 @@ func main() {
 			lyric := lyrics[idx]
 
 			waybar := NewWaybar(lyrics, idx)
+
+			if info.Status == mpris.PlaybackPaused {
+				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+				waybar.Alt = Paused
+				waybar.Class = Class{Paused}
+				if !waybar.Is(lastWaybar) {
+					slog.Info("Lyrics", "line", lyric.Text)
+					waybar.Encode()
+					lastWaybar = waybar
+				}
+			}
+
 			if lyric.Text == "" {
 				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
 				waybar.Alt = Music
