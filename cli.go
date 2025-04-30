@@ -55,6 +55,11 @@ func init() {
 		os.Exit(1)
 	}
 
+	if TooltipLines < 4 {
+		fmt.Fprintln(os.Stderr, "Tooltip lines limit must be at least 4")
+		return
+	}
+
 	opts := slogcolor.DefaultOptions
 	opts.LevelTags = map[slog.Level]string{
 		slog.LevelDebug: color.New(color.FgGreen).Sprint("DEBUG"),

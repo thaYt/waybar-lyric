@@ -34,11 +34,6 @@ func truncate(input string) string {
 }
 
 func main() {
-	if TooltipLines < 4 {
-		fmt.Fprintln(os.Stderr, "Tooltip lines limit must be at least 4")
-		return
-	}
-
 	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)
 		return
