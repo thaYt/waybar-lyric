@@ -21,6 +21,9 @@ desktop music experience.
 - Custom waybar tooltip
 - Configurable maximum text length
 - Detailed logging options
+- Profanity filter
+  - Partial (`badword` -> `b*****d`)
+  - Full (`badword` -> `*******`)
 
 ## Installation
 
