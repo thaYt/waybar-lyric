@@ -191,6 +191,7 @@ func main() {
 					waybar.Encode()
 					lastWaybar = waybar
 				}
+				continue
 			}
 
 			if !waybar.Is(lastWaybar) {
@@ -211,6 +212,7 @@ func main() {
 					waybar.Encode()
 					lastWaybar = waybar
 				}
+				continue
 			}
 
 			if lyric.Text == "" {
