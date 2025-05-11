@@ -22,7 +22,7 @@ func PrintSnippet() {
 		"music": "󰝚",
 	},
 	"exec-if": "which waybar-lyric",
-	"exec": "waybar-lyric --max-length %d",
+	"exec": "waybar-lyric --quiet -m%d",
 	"on-click": "waybar-lyric --toggle",
 },
 `, MaxTextLength)
