@@ -67,17 +67,21 @@ go install
 
 ```
 Usage: /usr/bin/waybar-lyric [options]
-Get spotify lyrics on waybar.
+Get lyrics on waybar.
 
 Options:
-      --init                   Show JSON snippet for waybar/config.jsonc
-      --log-file string        File where logs should be saved
-      --max-length int         Maximum length of lyrics text (default 150)
-      --toggle                 Toggle player state (pause/resume)
-  -t, --tooltip-color string   Maximum length of lyrics text (default "#cccccc")
-      --tooltip-lines int      Maximum lines of waybar tooltip (default 8)
-  -v, --verbose                Use verbose logging
-      --version                Print the version of waybar-lyric
+  -c, --compact                   Output only text content on each line
+  -f, --filter-profanity string   Filter profanity from lyrics (values: full, partial)
+  -i, --init                      Display JSON snippet for waybar/config.jsonc
+  -o, --log-file string           Specify file path for saving logs
+  -l, --lyric-only                Display only lyrics in text output (Experimental)
+  -m, --max-length int            Set maximum character length for lyrics text (default 150)
+  -q, --quiet                     Suppress all log output
+  -t, --toggle                    Toggle player state between pause and resume
+  -C, --tooltip-color string      Set color for inactive lyrics lines (default "#cccccc")
+  -L, --tooltip-lines int         Set maximum number of lines in waybar tooltip (default 8)
+  -v, --verbose                   Enable verbose logging
+  -V, --version                   Display waybar-lyric version information
 ```
 
 ## Configuration
