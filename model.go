@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"reflect"
 	"strings"
@@ -147,3 +149,13 @@ func (s Store) Load(key string) (Lyrics, bool) {
 	v, e := s[key]
 	return v, e
 }
+
+// noopHandler is a empty handler that ignore all logs
+type noopHandler struct{}
+
+var _ slog.Handler = (*noopHandler)(nil)
+
+func (h *noopHandler) Enabled(_ context.Context, _ slog.Level) bool  { return false }
+func (h *noopHandler) Handle(_ context.Context, _ slog.Record) error { return nil }
+func (h *noopHandler) WithAttrs(_ []slog.Attr) slog.Handler          { return h }
+func (h *noopHandler) WithGroup(_ string) slog.Handler               { return h }

@@ -16,6 +16,7 @@ var (
 	PrintVersion    = false
 	ToggleState     = false
 	VerboseLog      = false
+	Quiet           = false
 	LyricOnly       = false
 	Compact         = false
 	MaxTextLength   = 150
@@ -33,6 +34,7 @@ func init() {
 	pflag.BoolVar(&ToggleState, "toggle", ToggleState, "Toggle player state (pause/resume)")
 	pflag.BoolVar(&LyricOnly, "lyric-only", LyricOnly, "Only show lyrics on text (Experimental)")
 	pflag.BoolVar(&Compact, "compact", Compact, "Prints only the text in each line")
+	pflag.BoolVar(&Quiet, "quiet", Quiet, "Avoid printing logs")
 	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
 	pflag.IntVar(&TooltipLines, "tooltip-lines", TooltipLines, "Maximum lines of waybar tooltip")
 	pflag.StringVarP(&TooltipColor, "tooltip-color", "t", TooltipColor, "Color of inactive lyrics lines")
@@ -64,6 +66,11 @@ func init() {
 		return
 	}
 
+	if Quiet {
+		slog.SetDefault(slog.New(&noopHandler{}))
+		return
+	}
+
 	opts := slogcolor.DefaultOptions
 	opts.LevelTags = map[slog.Level]string{
 		slog.LevelDebug: color.New(color.FgGreen).Sprint("DEBUG"),
@@ -76,19 +83,20 @@ func init() {
 		opts.Level = slog.LevelDebug
 	}
 
-	if LogFilePath != "" {
-		os.MkdirAll(filepath.Dir(LogFilePath), 0755)
-
-		file, err := os.OpenFile(LogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-		if err != nil {
-			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
-			slog.Error("Failed to open log-file", "error", err)
-		} else {
-			opts.NoColor = true
-			slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
-			defer file.Close() // Close the file when done
-		}
-	} else {
+	if LogFilePath == "" {
 		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+		return
+	}
+
+	os.MkdirAll(filepath.Dir(LogFilePath), 0755)
+
+	file, err := os.OpenFile(LogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+		slog.Error("Failed to open log-file", "error", err)
+	} else {
+		opts.NoColor = true
+		slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
+		defer file.Close() // Close the file when done
 	}
 }
