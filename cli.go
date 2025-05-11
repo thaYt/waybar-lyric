@@ -17,6 +17,7 @@ var (
 	ToggleState     = false
 	VerboseLog      = false
 	LyricOnly       = false
+	Compact         = false
 	MaxTextLength   = 150
 	TooltipLines    = 8
 	TooltipColor    = "#cccccc"
@@ -31,6 +32,7 @@ func init() {
 	pflag.BoolVar(&PrintVersion, "version", PrintVersion, "Print the version of waybar-lyric")
 	pflag.BoolVar(&ToggleState, "toggle", ToggleState, "Toggle player state (pause/resume)")
 	pflag.BoolVar(&LyricOnly, "lyric-only", LyricOnly, "Only show lyrics on text (Experimental)")
+	pflag.BoolVar(&Compact, "compact", Compact, "Prints only the text in each line")
 	pflag.IntVar(&MaxTextLength, "max-length", MaxTextLength, "Maximum length of lyrics text")
 	pflag.IntVar(&TooltipLines, "tooltip-lines", TooltipLines, "Maximum lines of waybar tooltip")
 	pflag.StringVarP(&TooltipColor, "tooltip-color", "t", TooltipColor, "Color of inactive lyrics lines")

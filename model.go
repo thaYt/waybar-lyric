@@ -86,6 +86,11 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 }
 
 func (w *Waybar) Encode() {
+	if Compact {
+		fmt.Println(w.Text)
+		return
+	}
+
 	if w == (&Waybar{}) {
 		fmt.Println("{}")
 	}
