@@ -58,6 +58,7 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	end := min(idx+TooltipLines-2, len(lyrics))
 
 	tooltipLyrics := lyrics[start:end]
+
 	var tooltip strings.Builder
 
 	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
@@ -71,9 +72,10 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 		if start+i == idx {
 			newLine := fmt.Sprintf("</span><b><big>%s</big></b>\n<span foreground=\"%s\">", line, TooltipColor)
 			tooltip.WriteString(newLine)
-		} else {
-			tooltip.WriteString(line + "\n")
+			continue
 		}
+
+		tooltip.WriteString(line + "\n")
 	}
 
 	line := truncate(lyric.Text)
@@ -95,6 +97,14 @@ func (w *Waybar) Encode() {
 
 func (w *Waybar) Is(waybar *Waybar) bool {
 	return reflect.DeepEqual(w, waybar)
+}
+
+func (w *Waybar) Paused(info *PlayerInfo) {
+	if !LyricOnly {
+		w.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+	}
+	w.Alt = Paused
+	w.Class = Class{Paused}
 }
 
 type PlayerInfo struct {

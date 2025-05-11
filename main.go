@@ -164,29 +164,28 @@ func main() {
 		}
 
 		if idx == -1 {
-			var tooltip strings.Builder
-			tooltip.WriteString("<b><big>󰝚 </big></b>\n")
-			tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
+			tooltipStart := fmt.Sprintf("<span foreground=\"%s\">", TooltipColor)
+			tooltipEnd := "</span>"
 
 			end := min(TooltipLines, len(lyrics))
-			tooltipLyrics := lyrics[:end]
-			for _, ttl := range tooltipLyrics {
+			lines := make([]string, end+1)
+			lines[0] = "<b><big>󰝚 </big></b>"
+
+			for i, ttl := range lyrics[:end] {
 				if ttl.Text != "" {
-					tooltip.WriteString(ttl.Text + "\n")
+					lines[i+1] = ttl.Text
 				} else {
-					tooltip.WriteString("󰝚 \n")
+					lines[i+1] = "󰝚 "
 				}
 			}
 
 			waybar := info.Waybar()
-			waybar.Tooltip = strings.TrimSpace(tooltip.String()) + "</span>"
+			waybar.Tooltip = tooltipStart + strings.Join(lines, "\n") + tooltipEnd
 			waybar.Alt = Music
 			waybar.Class = Class{Playing, Music}
 
 			if info.Status == mpris.PlaybackPaused {
-				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
-				waybar.Alt = Paused
-				waybar.Class = Class{Paused}
+				waybar.Paused(info)
 				if !waybar.Is(lastWaybar) {
 					waybar.Encode()
 					lastWaybar = waybar
@@ -202,11 +201,8 @@ func main() {
 			lyric := lyrics[idx]
 
 			waybar := NewWaybar(lyrics, idx)
-
 			if info.Status == mpris.PlaybackPaused {
-				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
-				waybar.Alt = Paused
-				waybar.Class = Class{Paused}
+				waybar.Paused(info)
 				if !waybar.Is(lastWaybar) {
 					slog.Info("Lyrics", "line", lyric.Text)
 					waybar.Encode()
