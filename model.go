@@ -88,6 +88,11 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 }
 
 func (w *Waybar) Encode() {
+	if w.Alt == Paused || w.Alt == Music {
+		fmt.Println("")
+		return
+	}
+
 	if Compact {
 		fmt.Println(w.Text)
 		return

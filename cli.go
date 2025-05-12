@@ -32,7 +32,7 @@ func init() {
 	pflag.BoolVarP(&PrintInit, "init", "i", PrintInit, "Display JSON snippet for waybar/config.jsonc")
 	pflag.BoolVarP(&PrintVersion, "version", "V", PrintVersion, "Display waybar-lyric version information")
 	pflag.BoolVarP(&ToggleState, "toggle", "t", ToggleState, "Toggle player state between pause and resume")
-	pflag.BoolVarP(&LyricOnly, "lyric-only", "l", LyricOnly, "Display only lyrics in text output (Experimental)")
+	pflag.BoolVarP(&LyricOnly, "lyric-only", "l", LyricOnly, "Display only lyrics in text output")
 	pflag.BoolVarP(&Compact, "compact", "c", Compact, "Output only text content on each line")
 	pflag.BoolVarP(&Quiet, "quiet", "q", Quiet, "Suppress all log output")
 	pflag.IntVarP(&MaxTextLength, "max-length", "m", MaxTextLength, "Set maximum character length for lyrics text")
