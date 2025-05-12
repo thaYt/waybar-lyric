@@ -74,7 +74,7 @@ Options:
   -f, --filter-profanity string   Filter profanity from lyrics (values: full, partial)
   -i, --init                      Display JSON snippet for waybar/config.jsonc
   -o, --log-file string           Specify file path for saving logs
-  -l, --lyric-only                Display only lyrics in text output (Experimental)
+  -l, --lyric-only                Display only lyrics in text output
   -m, --max-length int            Set maximum character length for lyrics text (default 150)
   -q, --quiet                     Suppress all log output
   -t, --toggle                    Toggle player state between pause and resume
