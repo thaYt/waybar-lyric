@@ -147,6 +147,7 @@ func main() {
 		if err != nil {
 			slog.Error("Failed to get lyrics", "error", err)
 			waybar := info.Waybar()
+			waybar.Alt = NoLyric
 			if !waybar.Is(lastWaybar) {
 				waybar.Encode()
 				lastWaybar = waybar

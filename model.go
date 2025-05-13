@@ -43,6 +43,7 @@ const (
 	Lyric   Status = "lyric"
 	Playing Status = "playing"
 	Paused  Status = "paused"
+	NoLyric Status = "no_lyric"
 )
 
 type Class []Status
@@ -137,7 +138,10 @@ func (p *PlayerInfo) Waybar() *Waybar {
 		alt = Paused
 	}
 
-	text := fmt.Sprintf("%s - %s", p.Artist, p.Title)
+	var text string
+	if !LyricOnly {
+		text = fmt.Sprintf("%s - %s", p.Artist, p.Title)
+	}
 
 	return &Waybar{Class: Class{alt}, Text: text, Alt: alt}
 }
