@@ -7,20 +7,22 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
-	"strings"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
 )
 
+// PlayerParser parses player information from mpris metadata
 type PlayerParser func(*mpris.Player) (*PlayerInfo, error)
 
 var supportedPlayers = map[string]PlayerParser{
 	"spotify":          DefaultParser,
+	"YoutubeMusic":     YouTubeMusicParser,
 	"amarok":           DefaultParser,
-	"io.bassi.Amberol": AmberolParser,
+	"io.bassi.Amberol": DefaultParser,
 }
 
+// SelectPlayer selects correct parses for player
 func SelectPlayer(conn *dbus.Conn) (*mpris.Player, PlayerParser, error) {
 	players, err := mpris.List(conn)
 	if err != nil {
@@ -102,17 +104,14 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 	}, nil
 }
 
-func AmberolParser(player *mpris.Player) (*PlayerInfo, error) {
+// YouTubeMusicParser parses mpris metadata for YouTubeMusic player
+// source: https://github.com/th-ch/youtube-music
+func YouTubeMusicParser(player *mpris.Player) (*PlayerInfo, error) {
 	info, err := DefaultParser(player)
 	if err != nil {
 		return nil, err
 	}
+	info.ID = StringToMD5(info.ID)
 
-	artsts := strings.Split(info.Artist, ";")
-	if len(artsts) == 0 {
-		return info, nil
-	}
-
-	info.Artist = artsts[0]
 	return info, nil
 }
