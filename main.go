@@ -156,6 +156,12 @@ func main() {
 			continue
 		}
 
+		err = info.UpdatePosition(player)
+		if err != nil {
+			slog.Error("Failed to update position", "error", err)
+			continue
+		}
+
 		idx := -1
 		for i, line := range lyrics {
 			if info.Position <= line.Timestamp {
@@ -205,7 +211,11 @@ func main() {
 			if info.Status == mpris.PlaybackPaused {
 				waybar.Paused(info)
 				if !waybar.Is(lastWaybar) {
-					slog.Info("Lyrics", "line", lyric.Text)
+					slog.Info("Lyrics",
+						"line", lyric.Text,
+						"line-time", lyric.Timestamp.String(),
+						"position", info.Position.String(),
+					)
 					waybar.Encode()
 					lastWaybar = waybar
 				}
@@ -218,7 +228,11 @@ func main() {
 			}
 
 			if !waybar.Is(lastWaybar) {
-				slog.Info("Lyrics", "line", lyric.Text)
+				slog.Info("Lyrics",
+					"line", lyric.Text,
+					"line-time", lyric.Timestamp.String(),
+					"position", info.Position.String(),
+				)
 				waybar.Encode()
 				lastWaybar = waybar
 			}

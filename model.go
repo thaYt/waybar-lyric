@@ -146,6 +146,16 @@ func (p *PlayerInfo) Waybar() *Waybar {
 	return &Waybar{Class: Class{alt}, Text: text, Alt: alt}
 }
 
+// UpdatePosition updates the position of player
+func (p *PlayerInfo) UpdatePosition(player *mpris.Player) error {
+	pos, err := player.GetPosition()
+	if err != nil {
+		return err
+	}
+	p.Position = pos
+	return nil
+}
+
 type Store map[string]Lyrics
 
 // Save saves lyrics to Store
