@@ -120,7 +120,9 @@ func (w *Waybar) Paused(info *PlayerInfo) {
 	w.Class = Class{Paused}
 }
 
+// PlayerInfo holds all information of currently playing track metadata
 type PlayerInfo struct {
+	Name   string
 	ID     string
 	Artist string
 	Title  string
@@ -153,6 +155,13 @@ func (p *PlayerInfo) UpdatePosition(player *mpris.Player) error {
 		return err
 	}
 	p.Position = pos
+
+	// HACK: YoutubeMusic dbus position ≈ 1.1 slow
+	if player.GetName() == mpris.BaseInterface+".YoutubeMusic" {
+		slog.Info("Adding 1.1 second to adjust mpris delay")
+		p.Position += 1100 * time.Millisecond
+	}
+
 	return nil
 }
 

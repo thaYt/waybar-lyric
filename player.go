@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"time"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
@@ -94,6 +95,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 	}
 
 	return &PlayerInfo{
+		Name:     player.GetName(),
 		ID:       id,
 		Artist:   artist,
 		Title:    title,
@@ -112,6 +114,9 @@ func YouTubeMusicParser(player *mpris.Player) (*PlayerInfo, error) {
 		return nil, err
 	}
 	info.ID = StringToMD5(info.ID)
+
+	// HACK: YoutubeMusic dbus position ≈ 1.1 slow
+	info.Position += 1100 * time.Millisecond
 
 	return info, nil
 }
