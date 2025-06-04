@@ -158,7 +158,7 @@ func (p *PlayerInfo) UpdatePosition(player *mpris.Player) error {
 
 	// HACK: YoutubeMusic dbus position ≈ 1.1 slow
 	if player.GetName() == mpris.BaseInterface+".YoutubeMusic" {
-		slog.Info("Adding 1.1 second to adjust mpris delay")
+		slog.Debug("Adding 1.1 second to adjust mpris delay")
 		p.Position += 1100 * time.Millisecond
 	}
 
