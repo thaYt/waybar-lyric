@@ -128,6 +128,7 @@ type PlayerInfo struct {
 	Artist string `json:"artist"`
 	Title  string `json:"title"`
 	Album  string `json:"album"`
+	Cover  string `json:"artwork"`
 
 	Position time.Duration `json:"position"`
 	Length   time.Duration `json:"length"`

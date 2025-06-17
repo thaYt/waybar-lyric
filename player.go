@@ -77,6 +77,9 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		return nil, err
 	}
 
+	// Cover is optional
+	cover, _ := meta["mpris:artUrl"].Value().(string)
+
 	artistList, ok := meta["xesam:artist"].Value().([]string)
 	if !ok || len(artistList) == 0 {
 		return nil, fmt.Errorf("missing artist information")
@@ -109,6 +112,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		Position: position,
 		Length:   length,
 		Shuffle:  shuffle,
+		Cover:    cover,
 	}, nil
 }
 
