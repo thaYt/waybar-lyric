@@ -131,6 +131,7 @@ type PlayerInfo struct {
 
 	Position time.Duration `json:"position"`
 	Length   time.Duration `json:"length"`
+	Shuffle  bool          `json:"shuffle"`
 
 	Status mpris.PlaybackStatus `json:"status"`
 }

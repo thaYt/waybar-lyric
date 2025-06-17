@@ -62,6 +62,11 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		slog.Debug("MPRIS", k, v)
 	}
 
+	shuffle, err := player.GetShuffle()
+	if err != nil {
+		return nil, err
+	}
+
 	status, err := player.GetPlaybackStatus()
 	if err != nil {
 		return nil, err
@@ -103,6 +108,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		Status:   status,
 		Position: position,
 		Length:   length,
+		Shuffle:  shuffle,
 	}, nil
 }
 
