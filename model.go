@@ -49,10 +49,11 @@ const (
 type Class []Status
 
 type Waybar struct {
-	Text    string `json:"text"`
-	Class   Class  `json:"class"`
-	Alt     Status `json:"alt"`
-	Tooltip string `json:"tooltip"`
+	Text    string      `json:"text"`
+	Class   Class       `json:"class"`
+	Alt     Status      `json:"alt"`
+	Tooltip string      `json:"tooltip"`
+	Info    *PlayerInfo `json:"info,omitempty"`
 }
 
 func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
@@ -122,16 +123,16 @@ func (w *Waybar) Paused(info *PlayerInfo) {
 
 // PlayerInfo holds all information of currently playing track metadata
 type PlayerInfo struct {
-	Name   string
-	ID     string
-	Artist string
-	Title  string
-	Album  string
+	Name   string `json:"name"`
+	ID     string `json:"id"`
+	Artist string `json:"artist"`
+	Title  string `json:"title"`
+	Album  string `json:"album"`
 
-	Position time.Duration
-	Length   time.Duration
+	Position time.Duration `json:"position"`
+	Length   time.Duration `json:"length"`
 
-	Status mpris.PlaybackStatus
+	Status mpris.PlaybackStatus `json:"status"`
 }
 
 func (p *PlayerInfo) Waybar() *Waybar {
@@ -145,7 +146,15 @@ func (p *PlayerInfo) Waybar() *Waybar {
 		text = fmt.Sprintf("%s - %s", p.Artist, p.Title)
 	}
 
-	return &Waybar{Class: Class{alt}, Text: text, Alt: alt}
+	waybar := &Waybar{
+		Class: Class{alt},
+		Text:  text,
+		Alt:   alt,
+	}
+	if Detailed {
+		waybar.Info = p
+	}
+	return waybar
 }
 
 // UpdatePosition updates the position of player

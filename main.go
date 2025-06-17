@@ -208,6 +208,10 @@ func main() {
 			lyric := lyrics[idx]
 
 			waybar := NewWaybar(lyrics, idx)
+			if Detailed {
+				waybar.Info = info
+			}
+
 			if info.Status == mpris.PlaybackPaused {
 				waybar.Paused(info)
 				if !waybar.Is(lastWaybar) {
