@@ -20,6 +20,7 @@ var (
 	LyricOnly       = false
 	Compact         = false
 	Detailed        = false
+	BreakTooltip    = 100000
 	MaxTextLength   = 150
 	TooltipLines    = 8
 	TooltipColor    = "#cccccc"
@@ -37,6 +38,7 @@ func init() {
 	pflag.BoolVarP(&Compact, "compact", "c", Compact, "Output only text content on each line")
 	pflag.BoolVarP(&Detailed, "detailed", "d", Compact, "Put detailed player information in output (Experimental)")
 	pflag.BoolVarP(&Quiet, "quiet", "q", Quiet, "Suppress all log output")
+	pflag.IntVarP(&BreakTooltip, "break-tooltip", "b", BreakTooltip, "Break long lines in tooltip")
 	pflag.IntVarP(&MaxTextLength, "max-length", "m", MaxTextLength, "Set maximum character length for lyrics text")
 	pflag.IntVarP(&TooltipLines, "tooltip-lines", "L", TooltipLines, "Set maximum number of lines in waybar tooltip")
 	pflag.StringVarP(&TooltipColor, "tooltip-color", "C", TooltipColor, "Set color for inactive lyrics lines")

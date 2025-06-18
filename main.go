@@ -180,7 +180,7 @@ func main() {
 
 			for i, ttl := range lyrics[:end] {
 				if ttl.Text != "" {
-					lines[i+1] = ttl.Text
+					lines[i+1] = BreakLine(ttl.Text, BreakTooltip)
 				} else {
 					lines[i+1] = "󰝚 "
 				}

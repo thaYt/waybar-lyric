@@ -68,7 +68,7 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
 
 	for i, ttl := range tooltipLyrics {
-		line := ttl.Text
+		line := BreakLine(ttl.Text, BreakTooltip)
 		if ttl.Text == "" {
 			line = "󰝚 "
 		}
