@@ -71,6 +71,25 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Clean In memery lyrics cache every 10 minute
+	go func(ctx context.Context) {
+		ticker := time.NewTicker(10 * time.Minute)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+			for id, val := range LyricStore {
+				// Delete the cache if lyrics is older than 5 minute
+				since := time.Since(val.LastAccess)
+				if since > 5*time.Minute {
+					delete(LyricStore, id)
+				}
+			}
+		}
+	}(ctx)
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
