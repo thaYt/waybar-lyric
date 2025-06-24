@@ -230,6 +230,7 @@ func main() {
 			if Detailed {
 				waybar.Info = info
 			}
+			waybar.Percentage = info.Percentage()
 
 			if info.Status == mpris.PlaybackPaused {
 				waybar.Paused(info)

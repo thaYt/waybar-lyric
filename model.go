@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -49,11 +48,12 @@ const (
 type Class []Status
 
 type Waybar struct {
-	Text    string      `json:"text"`
-	Class   Class       `json:"class"`
-	Alt     Status      `json:"alt"`
-	Tooltip string      `json:"tooltip"`
-	Info    *PlayerInfo `json:"info,omitempty"`
+	Text       string      `json:"text"`
+	Class      Class       `json:"class"`
+	Alt        Status      `json:"alt"`
+	Tooltip    string      `json:"tooltip"`
+	Percentage int         `json:"percentage"`
+	Info       *PlayerInfo `json:"info,omitempty"`
 }
 
 func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
@@ -89,9 +89,15 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	return &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
 }
 
+var Json = json.NewEncoder(os.Stdout)
+
+func init() {
+	Json.SetEscapeHTML(false)
+}
+
 func (w *Waybar) Encode() {
 	if LyricOnly && (w.Alt == Paused || w.Alt == Music) {
-		fmt.Println("")
+		fmt.Println("{}")
 		return
 	}
 
@@ -104,13 +110,33 @@ func (w *Waybar) Encode() {
 		fmt.Println("{}")
 	}
 
-	e := json.NewEncoder(os.Stdout)
-	e.SetEscapeHTML(false)
-	e.Encode(w)
+	Json.Encode(w)
 }
 
-func (w *Waybar) Is(waybar *Waybar) bool {
-	return reflect.DeepEqual(w, waybar)
+func (w *Waybar) Is(other *Waybar) bool {
+	if w == other {
+		return true
+	}
+	if other == nil {
+		return false
+	}
+	if w.Text != other.Text ||
+		w.Alt != other.Alt ||
+		w.Tooltip != other.Tooltip ||
+		w.Percentage != other.Percentage {
+		return false
+	}
+
+	if len(w.Class) != len(other.Class) {
+		return false
+	}
+	for i := range w.Class {
+		if w.Class[i] != other.Class[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (w *Waybar) Paused(info *PlayerInfo) {
@@ -137,6 +163,10 @@ type PlayerInfo struct {
 	Status mpris.PlaybackStatus `json:"status"`
 }
 
+func (p *PlayerInfo) Percentage() int {
+	return int((p.Position * 100) / p.Length)
+}
+
 func (p *PlayerInfo) Waybar() *Waybar {
 	var alt Status = Playing
 	if p.Status == "Paused" {
@@ -149,13 +179,16 @@ func (p *PlayerInfo) Waybar() *Waybar {
 	}
 
 	waybar := &Waybar{
-		Class: Class{alt},
-		Text:  text,
-		Alt:   alt,
+		Class:      Class{alt},
+		Text:       text,
+		Alt:        alt,
+		Percentage: p.Percentage(),
 	}
+
 	if Detailed {
 		waybar.Info = p
 	}
+
 	return waybar
 }
 
