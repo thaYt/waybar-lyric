@@ -78,8 +78,8 @@ func main() {
 		cancel()
 	}()
 
-	psChan := make(chan *dbus.Signal, 0)
-	player.OnSignal(psChan)
+	playerSignal := make(chan *dbus.Signal)
+	player.OnSignal(playerSignal)
 
 	lyricTicker := time.NewTicker(SleepTime)
 	defer lyricTicker.Stop()
@@ -94,7 +94,7 @@ func main() {
 		select {
 		case <-ctx.Done():
 			return // Clean exit on cancel
-		case <-psChan:
+		case <-playerSignal:
 			slog.Debug("Received player update signal")
 		case <-lyricTicker.C:
 		case <-fixedTicker.C:
