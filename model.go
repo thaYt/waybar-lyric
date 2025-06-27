@@ -27,8 +27,8 @@ type LrcLibResponse struct {
 
 // LyricLine is a line of synchronized lyrics
 type LyricLine struct {
-	Timestamp time.Duration
-	Text      string
+	Timestamp time.Duration `json:"time"`
+	Text      string        `json:"line"`
 }
 
 // Lyrics is a slice of LyricLine
@@ -48,12 +48,13 @@ const (
 type Class []Status
 
 type Waybar struct {
-	Text       string      `json:"text"`
-	Class      Class       `json:"class"`
-	Alt        Status      `json:"alt"`
-	Tooltip    string      `json:"tooltip"`
-	Percentage int         `json:"percentage"`
-	Info       *PlayerInfo `json:"info,omitempty"`
+	Text       string       `json:"text"`
+	Class      Class        `json:"class"`
+	Alt        Status       `json:"alt"`
+	Tooltip    string       `json:"tooltip"`
+	Percentage int          `json:"percentage"`
+	Info       *PlayerInfo  `json:"info,omitempty"`
+	Context    *[]LyricLine `json:"context,omitempty"`
 }
 
 func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
@@ -86,7 +87,13 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	class := Class{Lyric, Playing}
-	return &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
+	waybar := &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
+
+	if Detailed {
+		waybar.Context = &tooltipLyrics
+	}
+
+	return waybar
 }
 
 var Json = json.NewEncoder(os.Stdout)

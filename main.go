@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -181,7 +180,7 @@ func main() {
 			continue
 		}
 
-		idx := -1
+		var idx int
 		for i, line := range lyrics {
 			if info.Position <= line.Timestamp {
 				break
@@ -189,68 +188,16 @@ func main() {
 			idx = i
 		}
 
-		if idx == -1 {
-			tooltipStart := fmt.Sprintf("<span foreground=\"%s\">", TooltipColor)
-			tooltipEnd := "</span>"
+		lyric := lyrics[idx]
 
-			end := min(TooltipLines, len(lyrics))
-			lines := make([]string, end+1)
-			lines[0] = "<b><big>󰝚 </big></b>"
+		waybar := NewWaybar(lyrics, idx)
+		if Detailed {
+			waybar.Info = info
+		}
+		waybar.Percentage = info.Percentage()
 
-			for i, ttl := range lyrics[:end] {
-				if ttl.Text != "" {
-					lines[i+1] = BreakLine(ttl.Text, BreakTooltip)
-				} else {
-					lines[i+1] = "󰝚 "
-				}
-			}
-
-			waybar := info.Waybar()
-			waybar.Tooltip = tooltipStart + strings.Join(lines, "\n") + tooltipEnd
-			waybar.Alt = Music
-			waybar.Class = Class{Playing, Music}
-
-			if info.Status == mpris.PlaybackPaused {
-				waybar.Paused(info)
-				if !waybar.Is(lastWaybar) {
-					waybar.Encode()
-					lastWaybar = waybar
-				}
-				continue
-			}
-
-			if !waybar.Is(lastWaybar) {
-				waybar.Encode()
-				lastWaybar = waybar
-			}
-		} else {
-			lyric := lyrics[idx]
-
-			waybar := NewWaybar(lyrics, idx)
-			if Detailed {
-				waybar.Info = info
-			}
-			waybar.Percentage = info.Percentage()
-
-			if info.Status == mpris.PlaybackPaused {
-				waybar.Paused(info)
-				if !waybar.Is(lastWaybar) {
-					slog.Info("Lyrics",
-						"line", lyric.Text,
-						"line-time", lyric.Timestamp.String(),
-						"position", info.Position.String(),
-					)
-					waybar.Encode()
-					lastWaybar = waybar
-				}
-				continue
-			}
-
-			if lyric.Text == "" {
-				waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
-				waybar.Alt = Music
-			}
-
+		if info.Status == mpris.PlaybackPaused {
+			waybar.Paused(info)
 			if !waybar.Is(lastWaybar) {
 				slog.Info("Lyrics",
 					"line", lyric.Text,
@@ -260,25 +207,41 @@ func main() {
 				waybar.Encode()
 				lastWaybar = waybar
 			}
+			continue
+		}
 
-			if len(lyrics) > idx+1 {
-				n := lyrics[idx+1]
-				d := n.Timestamp - info.Position
-				if d <= 0 {
-					slog.Warn("Negative sleep time",
-						"duration", d.String(),
-						"position", info.Position.String(),
-						"next", n.Timestamp.String(),
-					)
-					continue
-				}
-				slog.Debug("Sleep",
+		if lyric.Text == "" {
+			waybar.Text = fmt.Sprintf("%s - %s", info.Artist, info.Title)
+			waybar.Alt = Music
+		}
+
+		if !waybar.Is(lastWaybar) {
+			slog.Info("Lyrics",
+				"line", lyric.Text,
+				"line-time", lyric.Timestamp.String(),
+				"position", info.Position.String(),
+			)
+			waybar.Encode()
+			lastWaybar = waybar
+		}
+
+		if len(lyrics) > idx+1 {
+			n := lyrics[idx+1]
+			d := n.Timestamp - info.Position
+			if d <= 0 {
+				slog.Warn("Negative sleep time",
 					"duration", d.String(),
 					"position", info.Position.String(),
 					"next", n.Timestamp.String(),
 				)
-				lyricTicker.Reset(d)
+				continue
 			}
+			slog.Debug("Sleep",
+				"duration", d.String(),
+				"position", info.Position.String(),
+				"next", n.Timestamp.String(),
+			)
+			lyricTicker.Reset(d)
 		}
 
 	}

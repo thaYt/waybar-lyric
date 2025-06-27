@@ -14,7 +14,7 @@ import (
 // "[timestamp]lyric text", where timestamp is in a format parseable by ParseTimestamp.
 // Empty lines and malformed lines are skipped.
 func ParseLyrics(file string) ([]LyricLine, error) {
-	var lyrics []LyricLine
+	lyrics := []LyricLine{{}} // add empty line a start of the lyrics
 	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
