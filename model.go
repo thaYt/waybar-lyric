@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -29,6 +30,9 @@ type LrcLibResponse struct {
 type LyricLine struct {
 	Timestamp time.Duration `json:"time"`
 	Text      string        `json:"line"`
+
+	// Active is used for detailed context
+	Active bool `json:"active"`
 }
 
 // Lyrics is a slice of LyricLine
@@ -62,19 +66,20 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	start := max(idx-2, 0)
 	end := min(idx+TooltipLines-2, len(lyrics))
 
-	tooltipLyrics := lyrics[start:end]
+	context := slices.Clone(lyrics[start:end])
 
 	var tooltip strings.Builder
 
 	tooltip.WriteString(fmt.Sprintf("<span foreground=\"%s\">", TooltipColor))
 
-	for i, ttl := range tooltipLyrics {
+	for i, ttl := range context {
 		line := BreakLine(ttl.Text, BreakTooltip)
 		if ttl.Text == "" {
 			line = "󰝚 "
 		}
 
 		if start+i == idx {
+			context[i].Active = true
 			newLine := fmt.Sprintf("</span><b><big>%s</big></b>\n<span foreground=\"%s\">", line, TooltipColor)
 			tooltip.WriteString(newLine)
 			continue
@@ -90,7 +95,7 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 	waybar := &Waybar{Alt: Lyric, Class: class, Text: line, Tooltip: tt}
 
 	if Detailed {
-		waybar.Context = &tooltipLyrics
+		waybar.Context = &context
 	}
 
 	return waybar
