@@ -104,7 +104,7 @@ func init() {
 
 func (w *Waybar) Encode() {
 	if LyricOnly && (w.Alt == Paused || w.Alt == Music) {
-		fmt.Println("{}")
+		fmt.Println("")
 		return
 	}
 
