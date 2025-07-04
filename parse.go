@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -35,10 +34,6 @@ func ParseLyrics(file string) ([]LyricLine, error) {
 
 		lyric := LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
-	}
-
-	if len(lyrics) == 0 {
-		return lyrics, errors.New("Lyric lines are 0")
 	}
 
 	return lyrics, nil
