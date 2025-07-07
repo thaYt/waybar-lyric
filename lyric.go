@@ -40,6 +40,25 @@ func CensorLyrics(lyrics Lyrics) {
 	}
 }
 
+var substitutions = map[string]string{
+	"you": "u",
+	"are": "r",
+	"and": "n",
+	".":   "...",
+}
+
+func SimplifyLyrics(lyrics Lyrics) {
+	if Simplify {
+		for i, l := range lyrics {
+			lyrics[i].Text = strings.ToLower(l.Text)
+			lyrics[i].Text = strings.ReplaceAll(l.Text, ",", "")
+			for old, new := range substitutions {
+				lyrics[i].Text = strings.ReplaceAll(lyrics[i].Text, old, new)
+			}
+		}
+	}
+}
+
 func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	uri := filepath.Base(info.ID)
 	uri = strings.ReplaceAll(uri, "/", "-")
@@ -56,6 +75,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 
 	if cachedLyrics, err := LoadCache(cacheFile); err == nil {
 		CensorLyrics(cachedLyrics)
+		SimplifyLyrics(cachedLyrics)
 		LyricStore.Save(uri, cachedLyrics)
 		return cachedLyrics, nil
 	} else {
@@ -118,6 +138,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	}
 
 	CensorLyrics(lyrics)
+	SimplifyLyrics(lyrics)
 	LyricStore.Save(uri, lyrics)
 	return lyrics, nil
 }
