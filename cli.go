@@ -44,7 +44,7 @@ func init() {
 	pflag.IntVarP(&TooltipLines, "tooltip-lines", "L", TooltipLines, "Set maximum number of lines in waybar tooltip")
 	pflag.StringVarP(&TooltipColor, "tooltip-color", "C", TooltipColor, "Set color for inactive lyrics lines")
 	pflag.StringVarP(&FilterProfanityType, "filter-profanity", "f", FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
-	pflag.BoolVarP(&Simplify, "simplify", "s", Simplify, "lowercase + remove commas and some other substitutions")
+	pflag.BoolVarP(&Simplify, "simplify", "s", Simplify, "lowercase + remove some other substitutions")
 	pflag.BoolVarP(&VerboseLog, "verbose", "v", VerboseLog, "Enable verbose logging")
 	pflag.StringVarP(&LogFilePath, "log-file", "o", LogFilePath, "Specify file path for saving logs")
 

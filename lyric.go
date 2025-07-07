@@ -40,18 +40,18 @@ func CensorLyrics(lyrics Lyrics) {
 	}
 }
 
+// we love necessary padding
+// also insanely subjective
 var substitutions = map[string]string{
-	"you": "u",
-	"are": "r",
-	"and": "n",
-	".":   "...",
+	" you're ": " y'roue ", // 🤑
+	".":        "...",
+	"'":        "",
 }
 
 func SimplifyLyrics(lyrics Lyrics) {
 	if Simplify {
 		for i, l := range lyrics {
 			lyrics[i].Text = strings.ToLower(l.Text)
-			lyrics[i].Text = strings.ReplaceAll(l.Text, ",", "")
 			for old, new := range substitutions {
 				lyrics[i].Text = strings.ReplaceAll(lyrics[i].Text, old, new)
 			}
