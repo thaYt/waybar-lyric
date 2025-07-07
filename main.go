@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -140,6 +141,12 @@ func main() {
 				lastWaybar = waybar
 			}
 			continue
+		}
+
+		if Simplify {
+			info.Title = strings.ToLower(info.Title)
+			info.Artist = strings.ToLower(info.Artist)
+			info.Album = strings.ToLower(info.Album)
 		}
 
 		slog.Debug("PlayerInfo",
