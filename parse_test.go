@@ -118,7 +118,10 @@ func TestParseTimestamp(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("parseTimestamp() succeeded unexpectedly")
 			}
-			t.Logf("parseTimestamp() = %v, want %v", got, tt.want)
+
+			if got != tt.want {
+				t.Logf("parseTimestamp() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
