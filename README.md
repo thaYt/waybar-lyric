@@ -58,6 +58,12 @@ desktop music experience.
 - From [AUR](https://aur.archlinux.org/packages); Recommended for Arch `btw` users.
 
 ```bash
+yay -S waybar-lyric
+```
+
+or the latest git commit:
+
+```bash
 yay -S waybar-lyric-git
 ```
 
@@ -66,9 +72,9 @@ yay -S waybar-lyric-git
 On NixOS:
 
 ```nix
-  environment.systemPackages = [
-    pkgs.waybar-lyric
-  ];
+environment.systemPackages = [
+  pkgs.waybar-lyric
+];
 ```
 
 On Non NixOS:
