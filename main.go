@@ -18,20 +18,6 @@ const (
 	Version   = "waybar-lyric v0.11.0 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
-func truncate(input string) string {
-	r := []rune(input)
-
-	if len(r) <= MaxTextLength {
-		return input
-	}
-
-	if MaxTextLength > 3 {
-		return string(r[:MaxTextLength-3]) + "..."
-	}
-
-	return string(r[:MaxTextLength])
-}
-
 func main() {
 	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)

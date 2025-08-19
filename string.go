@@ -33,3 +33,18 @@ func BreakLine(line string, limit int) string {
 
 	return out.String()
 }
+
+// Truncate truncates using rune length from user input
+func Truncate(input string) string {
+	r := []rune(input)
+
+	if len(r) <= MaxTextLength {
+		return input
+	}
+
+	if MaxTextLength > 3 {
+		return string(r[:MaxTextLength-3]) + "..."
+	}
+
+	return string(r[:MaxTextLength])
+}

@@ -99,7 +99,7 @@ func NewWaybar(lyrics []LyricLine, idx int) *Waybar {
 		tooltip.WriteString(line + "\n")
 	}
 
-	line := truncate(lyric.Text)
+	line := Truncate(lyric.Text)
 	tt := strings.TrimSpace(tooltip.String()) + "</span>"
 
 	class := Class{Lyric, Playing}
