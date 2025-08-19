@@ -11,6 +11,7 @@ import (
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -18,21 +19,14 @@ const (
 	Version   = "waybar-lyric v0.11.0 (https://github.com/Nadim147c/waybar-lyric)"
 )
 
-func truncate(input string) string {
-	r := []rune(input)
-
-	if len(r) <= MaxTextLength {
-		return input
+func main() {
+	err := Command.Execute()
+	if err != nil {
+		os.Exit(1)
 	}
-
-	if MaxTextLength > 3 {
-		return string(r[:MaxTextLength-3]) + "..."
-	}
-
-	return string(r[:MaxTextLength])
 }
 
-func main() {
+func Execute(_ *cobra.Command, _ []string) {
 	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)
 		return
