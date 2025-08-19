@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/MatusOllah/slogcolor"
+	"github.com/carapace-sh/carapace"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -47,6 +48,10 @@ func init() {
 	Command.Flags().StringVarP(&FilterProfanityType, "filter-profanity", "f", FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
 	Command.Flags().StringVarP(&LogFilePath, "log-file", "o", LogFilePath, "Specify file path for saving logs")
 	Command.Flags().StringVarP(&TooltipColor, "tooltip-color", "C", TooltipColor, "Set color for inactive lyrics lines")
+
+	carapace.Gen(Command).FlagCompletion(carapace.ActionMap{
+		"log-file": carapace.ActionFiles(),
+	})
 }
 
 var logFile *os.File
