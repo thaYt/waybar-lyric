@@ -11,6 +11,7 @@ import (
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -19,6 +20,13 @@ const (
 )
 
 func main() {
+	err := Command.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func Execute(_ *cobra.Command, _ []string) {
 	if PrintVersion {
 		fmt.Fprint(os.Stderr, Version)
 		return
