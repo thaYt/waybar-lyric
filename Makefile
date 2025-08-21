@@ -45,3 +45,4 @@ uninstall:
 	rm -f $(BINDIR)/waybar-lyric
 	rm -rf $(LICENSEDIR)
 	rm -rf $(DOCDIR)
+	rm -rf $(BASHCOMPDIR) $(ZSHCOMPDIR) $(FISHCOMPDIR)
