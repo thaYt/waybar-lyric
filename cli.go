@@ -49,6 +49,10 @@ func init() {
 	Command.Flags().StringVarP(&LogFilePath, "log-file", "o", LogFilePath, "Specify file path for saving logs")
 	Command.Flags().StringVarP(&TooltipColor, "tooltip-color", "C", TooltipColor, "Set color for inactive lyrics lines")
 
+	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
+
+	Command.AddCommand(playPauseCmd)
+
 	carapace.Gen(Command).FlagCompletion(carapace.ActionMap{
 		"log-file": carapace.ActionFiles(),
 	})
@@ -67,7 +71,7 @@ var Command = &cobra.Command{
 		}
 		return nil
 	},
-	PreRunE: func(_ *cobra.Command, _ []string) error {
+	PreRunE: func(cmd *cobra.Command, _ []string) error {
 		switch FilterProfanityType {
 		case "":
 			FilterProfanity = false
@@ -115,6 +119,12 @@ var Command = &cobra.Command{
 		opts.NoColor = true
 		slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
 		logFile = file
+
+		if ToggleState {
+			cmd.RemoveCommand(playPauseCmd)
+			return playPauseCmd.Execute()
+		}
+
 		return nil
 	},
 }
