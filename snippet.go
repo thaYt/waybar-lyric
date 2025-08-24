@@ -24,7 +24,7 @@ func PrintSnippet() {
 	},
 	"exec-if": "which waybar-lyric",
 	"exec": "waybar-lyric --quiet -m%d",
-	"on-click": "waybar-lyric --toggle",
+	"on-click": "waybar-lyric play-pause",
 },
 `, MaxTextLength)
 

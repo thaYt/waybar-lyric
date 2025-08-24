@@ -53,14 +53,6 @@ func Execute(_ *cobra.Command, _ []string) {
 	}
 	slog.Debug("Player selected", "player", player)
 
-	if ToggleState {
-		slog.Info("Toggling player state")
-		if err := player.PlayPause(); err != nil {
-			slog.Error("Failed to toggle player state", "error", err)
-		}
-		return
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
