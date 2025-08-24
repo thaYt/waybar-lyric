@@ -53,7 +53,9 @@ func init() {
 
 	Command.AddCommand(playPauseCmd)
 
-	carapace.Gen(Command).FlagCompletion(carapace.ActionMap{
+	comp := carapace.Gen(Command)
+	comp.Standalone()
+	comp.FlagCompletion(carapace.ActionMap{
 		"log-file": carapace.ActionFiles(),
 	})
 }
