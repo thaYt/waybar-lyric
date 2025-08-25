@@ -58,6 +58,14 @@ var Command = &cobra.Command{
 		return nil
 	},
 	PreRunE: func(cmd *cobra.Command, _ []string) error {
+		if config.ToggleState {
+			defer func() {
+				cmd.RemoveCommand(playpause.Command)
+				playpause.Command.Execute()
+				os.Exit(0)
+			}()
+		}
+
 		switch config.FilterProfanityType {
 		case "":
 			config.FilterProfanity = false
@@ -105,11 +113,6 @@ var Command = &cobra.Command{
 		opts.NoColor = true
 		slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
 		logFile = file
-
-		if config.ToggleState {
-			cmd.RemoveCommand(playpause.Command)
-			return playpause.Command.Execute()
-		}
 
 		return nil
 	},
