@@ -1,4 +1,4 @@
-package main
+package str
 
 import (
 	"slices"
@@ -35,16 +35,13 @@ func BreakLine(line string, limit int) string {
 }
 
 // Truncate truncates using rune length from user input
-func Truncate(input string) string {
+func Truncate(input string, limit int) string {
 	r := []rune(input)
-
-	if len(r) <= MaxTextLength {
+	if len(r) <= limit {
 		return input
 	}
-
-	if MaxTextLength > 3 {
-		return string(r[:MaxTextLength-3]) + "..."
+	if limit > 3 {
+		return string(r[:limit-3]) + "..."
 	}
-
-	return string(r[:MaxTextLength])
+	return string(r[:limit])
 }

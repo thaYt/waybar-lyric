@@ -1,12 +1,15 @@
-package main
+package cmd
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/Nadim147c/waybar-lyric/internal/config"
 )
 
+// PrintSnippet prints the init snippet
 func PrintSnippet() {
 	fmt.Fprintln(os.Stderr, `Put the following object in your waybar config:`)
 
@@ -26,7 +29,7 @@ func PrintSnippet() {
 	"exec": "waybar-lyric --quiet -m%d",
 	"on-click": "waybar-lyric play-pause",
 },
-`, MaxTextLength)
+`, config.MaxTextLength)
 
 	cmd := exec.Command("which", "bat")
 	if err := cmd.Run(); err == nil {
