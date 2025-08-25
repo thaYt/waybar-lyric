@@ -1,13 +1,16 @@
 module github.com/Nadim147c/waybar-lyric
 
-go 1.24
+go 1.24.0
+
+toolchain go1.24.5
 
 require (
 	github.com/MatusOllah/slogcolor v1.6.0
-	github.com/Nadim147c/go-mpris v0.1.1
+	github.com/Nadim147c/go-mpris v0.3.1-0.20250825154650-264ddb9cf9d1
 	github.com/carapace-sh/carapace v1.8.6
 	github.com/fatih/color v1.16.0
 	github.com/godbus/dbus/v5 v5.1.0
+	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
 )
 

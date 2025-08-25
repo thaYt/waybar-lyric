@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/player"
 )
 
 // storeValue is Lyrics with LastAccess time
@@ -101,13 +103,21 @@ func init() {
 }
 
 // SaveCache saves the lyrics to cache
-func SaveCache(lines Lyrics, filePath string) error {
+func SaveCache(info *player.Info, lines Lyrics, filePath string) error {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
+	// Write player info as comments before lyrics
+	fmt.Fprintf(file, "# PLAYER: %s\n", info.Player)
+	fmt.Fprintf(file, "# ID: %s\n", info.ID)
+	fmt.Fprintf(file, "# ARTIST: %s\n", info.Artist)
+	fmt.Fprintf(file, "# TITLE: %s\n", info.Title)
+	fmt.Fprintf(file, "# ALBUM: %s\n", info.Album)
+
+	// Write lyrics
 	for line := range slices.Values(lines) {
 		_, err := fmt.Fprintf(file, "%d,%s\n", line.Timestamp, line.Text)
 		if err != nil {
@@ -130,6 +140,10 @@ func LoadCache(filePath string) (Lyrics, error) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
 		parts := strings.SplitN(line, ",", 2)
 		if len(parts) != 2 {
 			continue // Skip invalid lines

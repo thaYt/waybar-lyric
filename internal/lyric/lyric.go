@@ -130,7 +130,7 @@ func GetLyrics(info *player.Info) (Lyrics, error) {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
 	})
 
-	if err = SaveCache(lyrics, cacheFile); err != nil {
+	if err = SaveCache(info, lyrics, cacheFile); err != nil {
 		return nil, fmt.Errorf("failed to cache lyrics to psudo csv: %w", err)
 	}
 

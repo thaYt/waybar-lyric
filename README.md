@@ -25,6 +25,16 @@ Checkout the [example](./example/eww/) configuration.
 scrolling lyrics display that syncs with your currently playing music, enhancing your
 desktop music experience.
 
+## Supported Players
+
+- [Spotify](https://spotify.com)
+- [YouTubeMusic](https://github.com/th-ch/youtube-music)
+- [Amarok](https://amarok.kde.org/)
+- [Amberol](https://apps.gnome.org/en/Amberol/)
+- Firefox (Specific domains)
+  - `open.spotify.com`
+  - `music.youtube.com`
+
 ## Features
 
 - Real-time display of the current song's lyrics
