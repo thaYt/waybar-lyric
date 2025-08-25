@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"hash/fnv"
 	"log/slog"
+	"net/url"
+	"path"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/Nadim147c/go-mpris"
 	"github.com/godbus/dbus/v5"
@@ -65,6 +68,41 @@ func artistTitleFunc(p *mpris.Player) (uint64, error) {
 	return h.Sum64(), nil
 }
 
+// urlIDFunc: derive ID from URL for fallback players like Firefox
+func urlIDFunc(p *mpris.Player) (uint64, error) {
+	u, err := p.GetURL()
+	if err != nil || u == "" {
+		return 0, ErrNoID
+	}
+
+	parsed, err := url.Parse(u)
+	if err != nil {
+		return 0, err
+	}
+
+	host := strings.ToLower(parsed.Host)
+
+	// Only allow music.youtube.com and open.spotify.com
+	if !(strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com")) {
+		return 0, ErrNoID
+	}
+
+	id := ""
+	if strings.Contains(host, "music.youtube.com") {
+		id = parsed.Query().Get("v") // ?v=xxx
+	} else if strings.Contains(host, "open.spotify.com") {
+		id = path.Base(parsed.Path) // /track/xxx
+	}
+
+	if id == "" {
+		return 0, ErrNoID
+	}
+
+	h := fnv.New64a()
+	_, _ = fmt.Fprint(h, id)
+	return h.Sum64(), nil
+}
+
 var supportedPlayers = map[string]IDFunc{
 	"spotify":          trackIDFunc,
 	"YoutubeMusic":     trackIDFunc,
@@ -84,11 +122,35 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 		return nil, nil, errors.New("No player exists")
 	}
 
+	// First: explicitly supported players
 	for name, idFunc := range supportedPlayers {
-		for player := range slices.Values(players) {
-			if mpris.BaseInterface+"."+name == player {
-				return mpris.New(conn, player), parserWithIDFunc(DefaultParser, idFunc), nil
-			}
+		playerName := mpris.BaseInterface + "." + name
+		if slices.Contains(players, playerName) {
+			slog.Debug("Player selected", "name", playerName)
+			return mpris.New(conn, playerName), parserWithIDFunc(DefaultParser, idFunc), nil
+		}
+	}
+
+	// Fallback: Firefox only if URL is on music.youtube.com or open.spotify.com
+	for _, playerName := range players {
+		if !strings.Contains(strings.ToLower(playerName), "firefox") {
+			continue
+		}
+		slog.Debug("Checking player url", "for", "firefox")
+		fp := mpris.New(conn, playerName)
+		u, err := fp.GetURL()
+		if err != nil || u == "" {
+			slog.Debug("Checking player url", "for", "firefox")
+			continue
+		}
+		pu, err := url.Parse(u)
+		if err != nil {
+			continue
+		}
+		host := strings.ToLower(pu.Host)
+		if strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com") {
+			slog.Debug("Player selected", "name", "firefox")
+			return fp, parserWithIDFunc(DefaultParser, urlIDFunc), nil
 		}
 	}
 
@@ -111,6 +173,10 @@ func parserWithIDFunc(f Parser, i IDFunc) Parser {
 	}
 }
 
+func should[T any](v T, _ error) T {
+	return v
+}
+
 // DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
 func DefaultParser(player *mpris.Player) (*Info, error) {
 	meta, err := player.GetMetadata()
@@ -121,22 +187,17 @@ func DefaultParser(player *mpris.Player) (*Info, error) {
 		slog.Debug("MPRIS", k, v)
 	}
 
-	shuffle, err := player.GetShuffle()
-	if err != nil {
-		return nil, err
-	}
+	shuffle := should(player.GetShuffle())
+	cover := should(player.GetCoverURL())
+	volume := should(player.GetVolume())
+	album := should(player.GetAlbum())
+
+	urlStr := should(player.GetURL())
+	pu := should(url.Parse(urlStr))
 
 	status, err := player.GetPlaybackStatus()
 	if err != nil {
 		return nil, err
-	}
-
-	// Cover is optional
-	cover, _ := player.GetCoverURL()
-
-	volume, err := player.GetVolume()
-	if err != nil {
-		return nil, ErrNoPlayerVolume
 	}
 
 	length, err := player.GetLength()
@@ -167,14 +228,13 @@ func DefaultParser(player *mpris.Player) (*Info, error) {
 	idValue, _ := meta["mpris:trackid"]
 	trackid := cast.ToString(idValue.Value())
 
-	album, _ := player.GetAlbum()
-
 	info := &Info{
 		Player:  player.GetName(),
 		ID:      trackid,
 		Artist:  artist,
 		Title:   title,
 		Album:   album,
+		URL:     pu,
 		Status:  status,
 		Volume:  volume,
 		Length:  length,

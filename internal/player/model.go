@@ -3,6 +3,8 @@ package player
 import (
 	"encoding/json"
 	"log/slog"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
@@ -16,6 +18,8 @@ type Info struct {
 	Title  string `json:"title"`
 	Album  string `json:"album"`
 	Cover  string `json:"cover"`
+
+	URL *url.URL `json:"-"`
 
 	Volume   float64       `json:"volume"`
 	Position time.Duration `json:"position"`
@@ -55,8 +59,10 @@ func (p *Info) UpdatePosition(player *mpris.Player) error {
 	}
 	p.Position = pos
 
-	// HACK: YoutubeMusic dbus position ≈ 1.1 slow
-	if player.GetName() == mpris.BaseInterface+".YoutubeMusic" {
+	// HACK: YoutubeMusic dbus position is rounded to seconds which isn't ideal for realtime lyrics.
+	// Add 1.1sec delay make lyrics always appear before the song.
+	if player.GetName() == mpris.BaseInterface+".YoutubeMusic" ||
+		(p.URL != nil && strings.Contains(p.URL.Host, "music.youtube.com")) {
 		slog.Debug("Adding 1.1 second to adjust mpris delay")
 		p.Position += 1100 * time.Millisecond
 	}
