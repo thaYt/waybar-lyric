@@ -1,9 +1,10 @@
-package main
+package playpause
 
 import (
 	"log/slog"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cobra"
 )
@@ -11,11 +12,12 @@ import (
 func init() {
 	// This flag for ignoring by the playPauseCmd when running for deprecreated
 	// waybar-lyric --toggle.
-	playPauseCmd.Flags().BoolP("toggle", "t", false, "Toggle player state between pause and resume")
-	playPauseCmd.Flags().MarkHidden("toggle")
+	Command.Flags().BoolP("toggle", "t", false, "Toggle player state between pause and resume")
+	Command.Flags().MarkHidden("toggle")
 }
 
-var playPauseCmd = &cobra.Command{
+// Command is the play-pause command
+var Command = &cobra.Command{
 	Use:          "play-pause",
 	Short:        "Toggle play-pause state",
 	SilenceUsage: true,
@@ -26,18 +28,18 @@ var playPauseCmd = &cobra.Command{
 			return err
 		}
 
-		var player *mpris.Player
-		for player == nil {
-			p, _, err := SelectPlayer(conn)
+		var mp *mpris.Player
+		for mp == nil {
+			p, _, err := player.Select(conn)
 			if err == nil {
 				slog.Debug("Failed to select player", "error", err)
-				player = p
+				mp = p
 			}
 		}
-		slog.Debug("Player selected", "player", player)
+		slog.Debug("Player selected", "player", mp)
 
 		slog.Info("Toggling player state")
-		if err := player.PlayPause(); err != nil {
+		if err := mp.PlayPause(); err != nil {
 			slog.Error("Failed to toggle player state", "error", err)
 			return err
 		}

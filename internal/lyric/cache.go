@@ -1,4 +1,4 @@
-package main
+package lyric
 
 import (
 	"bufio"
@@ -15,36 +15,37 @@ import (
 	"time"
 )
 
-type StoreValue struct {
+// storeValue is Lyrics with LastAccess time
+type storeValue struct {
 	LastAccess time.Time
 	Lyrics     Lyrics
 }
 
-// Store is used to cache lyrics in memory
-type Store struct {
+// store is used to cache lyrics in memory
+type store struct {
 	mu   sync.RWMutex // Using RWMutex for better read performance
-	data map[string]*StoreValue
+	data map[string]*storeValue
 }
 
-// NewStore creates a new initialized Store
-func NewStore() *Store {
-	return &Store{
-		data: map[string]*StoreValue{},
+// newStore creates a new initialized Store
+func newStore() *store {
+	return &store{
+		data: map[string]*storeValue{},
 	}
 }
 
 // Save saves lyrics to Store
-func (s *Store) Save(id string, lyrics Lyrics) {
+func (s *store) Save(id string, lyrics Lyrics) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.data[id] = &StoreValue{
+	s.data[id] = &storeValue{
 		LastAccess: time.Now(),
 		Lyrics:     lyrics,
 	}
 }
 
 // Load loads lyrics from Store
-func (s *Store) Load(key string) (Lyrics, bool) {
+func (s *store) Load(key string) (Lyrics, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	v, exists := s.data[key]
@@ -57,7 +58,7 @@ func (s *Store) Load(key string) (Lyrics, bool) {
 
 // Cleanup runs a blocking loop that periodically removes unused entries
 // until the context is canceled.
-func (s *Store) Cleanup(ctx context.Context, interval time.Duration) {
+func (s *store) Cleanup(ctx context.Context, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
@@ -72,7 +73,7 @@ func (s *Store) Cleanup(ctx context.Context, interval time.Duration) {
 }
 
 // cleanupExpired removes entries not accessed within the interval
-func (s *Store) cleanupExpired(threshold time.Duration) {
+func (s *store) cleanupExpired(threshold time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for key, value := range s.data {
@@ -82,6 +83,7 @@ func (s *Store) cleanupExpired(threshold time.Duration) {
 	}
 }
 
+// CacheDir is waybar-lyric lyrics cache dir
 var CacheDir string
 
 func init() {
@@ -98,7 +100,8 @@ func init() {
 	}
 }
 
-func SaveCache(lines []LyricLine, filePath string) error {
+// SaveCache saves the lyrics to cache
+func SaveCache(lines Lyrics, filePath string) error {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -114,14 +117,15 @@ func SaveCache(lines []LyricLine, filePath string) error {
 	return nil
 }
 
-func LoadCache(filePath string) ([]LyricLine, error) {
+// LoadCache loads the lyrics from cache
+func LoadCache(filePath string) (Lyrics, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var lyrics []LyricLine
+	var lyrics Lyrics
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
@@ -139,7 +143,7 @@ func LoadCache(filePath string) ([]LyricLine, error) {
 		timestamp := time.Duration(ts)
 		text := strings.TrimSpace(parts[1])
 
-		lyric := LyricLine{Timestamp: timestamp, Text: text}
+		lyric := Line{Timestamp: timestamp, Text: text}
 		lyrics = append(lyrics, lyric)
 	}
 

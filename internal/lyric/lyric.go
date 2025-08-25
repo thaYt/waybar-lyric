@@ -1,4 +1,4 @@
-package main
+package lyric
 
 import (
 	"encoding/json"
@@ -11,16 +11,24 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/config"
+	"github.com/Nadim147c/waybar-lyric/internal/player"
+	"github.com/Nadim147c/waybar-lyric/internal/str"
 )
 
 var (
+	//revive:disable
 	ErrLyricsNotFound  = errors.New("lyrics not found")
 	ErrLyricsNotExists = errors.New("lyrics does not exists")
 	ErrLyricsNotSynced = errors.New("lyrics is not synced")
+	//revive:enable
 )
 
-var LyricStore = NewStore()
+// Store is in memory cache for lyrics
+var Store = newStore()
 
+// LrclibEndpoint is api endpoint for lrclib
 const LrclibEndpoint = "https://lrclib.net/api/get"
 
 func request(params url.Values, header http.Header) (*http.Response, error) {
@@ -39,19 +47,21 @@ func request(params url.Values, header http.Header) (*http.Response, error) {
 	return client.Do(req)
 }
 
+// CensorLyrics censors the lyrics with given filtering type
 func CensorLyrics(lyrics Lyrics) {
-	if FilterProfanity {
+	if config.FilterProfanity {
 		for i, l := range lyrics {
-			lyrics[i].Text = CensorText(l.Text, FilterProfanityType)
+			lyrics[i].Text = str.CensorText(l.Text, config.FilterProfanityType)
 		}
 	}
 }
 
-func GetLyrics(info *PlayerInfo) (Lyrics, error) {
+// GetLyrics returns lyrics for given *player.Info
+func GetLyrics(info *player.Info) (Lyrics, error) {
 	uri := filepath.Base(info.ID)
 	uri = strings.ReplaceAll(uri, "/", "-")
 
-	if val, exists := LyricStore.Load(uri); exists {
+	if val, exists := Store.Load(uri); exists {
 		if len(val) == 0 {
 			return val, ErrLyricsNotExists
 		}
@@ -64,7 +74,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	cachedLyrics, err := LoadCache(cacheFile)
 	if err == nil {
 		CensorLyrics(cachedLyrics)
-		LyricStore.Save(uri, cachedLyrics)
+		Store.Save(uri, cachedLyrics)
 		return cachedLyrics, nil
 	}
 	slog.Warn("Can't find the lyrics in the cache", "error", err)
@@ -80,7 +90,7 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	}
 
 	header := http.Header{}
-	header.Set("User-Agent", Version)
+	header.Set("User-Agent", config.Version)
 
 	resp, err := request(queryParams, header)
 	if err != nil {
@@ -89,34 +99,34 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		LyricStore.Save(uri, []LyricLine{})
+		Store.Save(uri, Lyrics{})
 		return nil, ErrLyricsNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		LyricStore.Save(uri, []LyricLine{})
+		Store.Save(uri, Lyrics{})
 		return nil, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
 	var resJSON LrcLibResponse
 	err = json.NewDecoder(resp.Body).Decode(&resJSON)
 	if err != nil {
-		LyricStore.Save(uri, []LyricLine{})
+		Store.Save(uri, Lyrics{})
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	lyrics, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
-		LyricStore.Save(uri, []LyricLine{})
+		Store.Save(uri, Lyrics{})
 		return nil, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
 	if len(lyrics) == 0 {
-		LyricStore.Save(uri, []LyricLine{})
+		Store.Save(uri, Lyrics{})
 		return nil, ErrLyricsNotSynced
 	}
 
-	slices.SortFunc(lyrics, func(a, b LyricLine) int {
+	slices.SortFunc(lyrics, func(a, b Line) int {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
 	})
 
@@ -125,6 +135,6 @@ func GetLyrics(info *PlayerInfo) (Lyrics, error) {
 	}
 
 	CensorLyrics(lyrics)
-	LyricStore.Save(uri, lyrics)
+	Store.Save(uri, lyrics)
 	return lyrics, nil
 }

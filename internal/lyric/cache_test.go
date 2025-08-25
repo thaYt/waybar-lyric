@@ -1,4 +1,4 @@
-package main
+package lyric
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestStore_SaveLoad(t *testing.T) {
-	s := NewStore()
+	s := newStore()
 	lyrics := Lyrics{{Text: "Hello"}}
 	id := "test-id"
 
@@ -22,7 +22,7 @@ func TestStore_SaveLoad(t *testing.T) {
 }
 
 func TestStore_LoadUpdatesAccessTime(t *testing.T) {
-	s := NewStore()
+	s := newStore()
 	id := "test-id"
 	s.Save(id, Lyrics{})
 
@@ -41,7 +41,7 @@ func TestStore_LoadUpdatesAccessTime(t *testing.T) {
 }
 
 func TestStore_CleanupExpired(t *testing.T) {
-	s := NewStore()
+	s := newStore()
 	threshold := 10 * time.Millisecond
 
 	// Save an entry and immediately mark it as expired by not accessing it
@@ -60,7 +60,7 @@ func TestStore_CleanupExpired(t *testing.T) {
 }
 
 func TestStore_CleanupLoop(t *testing.T) {
-	s := NewStore()
+	s := newStore()
 	t.Parallel()
 	ctx := t.Context()
 

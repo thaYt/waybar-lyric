@@ -1,4 +1,4 @@
-package main
+package player
 
 import (
 	"crypto/md5"
@@ -13,23 +13,26 @@ import (
 )
 
 var (
+	// ErrNoPlayerVolume when failed to get player volume
 	ErrNoPlayerVolume = errors.New("failed to get player volume")
-	ErrNoArtists      = errors.New("failed to get artists")
-	ErrNoTitle        = errors.New("failed to get title")
+	// ErrNoArtists when failed to get artists
+	ErrNoArtists = errors.New("failed to get artists")
+	// ErrNoTitle when failed to get title
+	ErrNoTitle = errors.New("failed to get title")
 )
 
-// PlayerParser parses player information from mpris metadata
-type PlayerParser func(*mpris.Player) (*PlayerInfo, error)
+// Parser parses player information from mpris metadata
+type Parser func(*mpris.Player) (*Info, error)
 
-var supportedPlayers = map[string]PlayerParser{
+var supportedPlayers = map[string]Parser{
 	"spotify":          DefaultParser,
 	"YoutubeMusic":     YouTubeMusicParser,
 	"amarok":           DefaultParser,
 	"io.bassi.Amberol": DefaultParser,
 }
 
-// SelectPlayer selects correct parses for player
-func SelectPlayer(conn *dbus.Conn) (*mpris.Player, PlayerParser, error) {
+// Select selects correct parses for player
+func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 	players, err := mpris.List(conn)
 	if err != nil {
 		return nil, nil, err
@@ -58,7 +61,7 @@ func StringToMD5(s string) string {
 }
 
 // DefaultParser takes *mpris.Player of spotify and return *PlayerInfo
-func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
+func DefaultParser(player *mpris.Player) (*Info, error) {
 	meta, err := player.GetMetadata()
 	if err != nil {
 		return nil, err
@@ -112,7 +115,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 		return nil, err
 	}
 
-	return &PlayerInfo{
+	return &Info{
 		Player:   player.GetName(),
 		ID:       id,
 		Artist:   artist,
@@ -129,7 +132,7 @@ func DefaultParser(player *mpris.Player) (*PlayerInfo, error) {
 
 // YouTubeMusicParser parses mpris metadata for YouTubeMusic player
 // source: https://github.com/th-ch/youtube-music
-func YouTubeMusicParser(player *mpris.Player) (*PlayerInfo, error) {
+func YouTubeMusicParser(player *mpris.Player) (*Info, error) {
 	info, err := DefaultParser(player)
 	if err != nil {
 		return nil, err
