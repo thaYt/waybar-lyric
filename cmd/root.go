@@ -10,6 +10,7 @@ import (
 	"github.com/MatusOllah/slogcolor"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
 	"github.com/Nadim147c/waybar-lyric/cmd/position"
+	"github.com/Nadim147c/waybar-lyric/cmd/seek"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/carapace-sh/carapace"
 	"github.com/fatih/color"
@@ -38,6 +39,7 @@ func init() {
 
 	Command.AddCommand(playpause.Command)
 	Command.AddCommand(position.Command)
+	Command.AddCommand(seek.Command)
 
 	comp := carapace.Gen(Command)
 	comp.Standalone()
