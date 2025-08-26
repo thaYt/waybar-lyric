@@ -2,8 +2,6 @@ package player
 
 import (
 	"errors"
-	"fmt"
-	"hash/fnv"
 	"log/slog"
 	"net/url"
 	"path"
@@ -12,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/cespare/xxhash"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cast"
 )
@@ -43,11 +42,8 @@ func trackIDFunc(p *mpris.Player) (uint64, error) {
 	if !ok {
 		return 0, ErrNoID
 	}
-	trackid := cast.ToString(val.Value())
 
-	h := fnv.New64a()
-	_, _ = fmt.Fprint(h, trackid)
-	return h.Sum64(), nil
+	return xxhash.Sum64String(val.String()), nil
 }
 
 // artistTitleFunc: uses artist+title combo as ID source
@@ -63,9 +59,7 @@ func artistTitleFunc(p *mpris.Player) (uint64, error) {
 		return 0, ErrNoTitle
 	}
 
-	h := fnv.New64a()
-	_, _ = fmt.Fprintf(h, "%s:%s", artist, title)
-	return h.Sum64(), nil
+	return xxhash.Sum64String(artist + ":" + title), nil
 }
 
 // urlIDFunc: derive ID from URL for fallback players like Firefox
@@ -98,9 +92,7 @@ func urlIDFunc(p *mpris.Player) (uint64, error) {
 		return 0, ErrNoID
 	}
 
-	h := fnv.New64a()
-	_, _ = fmt.Fprint(h, id)
-	return h.Sum64(), nil
+	return xxhash.Sum64String(parsed.Host + ":" + id), nil
 }
 
 var supportedPlayers = map[string]IDFunc{

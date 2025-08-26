@@ -110,27 +110,6 @@ cd waybar-lyric
 go install
 ```
 
-## Usage
-
-```
-Usage: /usr/bin/waybar-lyric [options]
-Get lyrics on waybar.
-
-Options:
-  -c, --compact                   Output only text content on each line
-  -f, --filter-profanity string   Filter profanity from lyrics (values: full, partial)
-  -i, --init                      Display JSON snippet for waybar/config.jsonc
-  -o, --log-file string           Specify file path for saving logs
-  -l, --lyric-only                Display only lyrics in text output
-  -m, --max-length int            Set maximum character length for lyrics text (default 150)
-  -q, --quiet                     Suppress all log output
-  -t, --toggle                    Toggle player state between pause and resume
-  -C, --tooltip-color string      Set color for inactive lyrics lines (default "#cccccc")
-  -L, --tooltip-lines int         Set maximum number of lines in waybar tooltip (default 8)
-  -v, --verbose                   Enable verbose logging
-  -V, --version                   Display waybar-lyric version information
-```
-
 ## Configuration
 
 ### Waybar Configuration
