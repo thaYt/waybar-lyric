@@ -9,6 +9,7 @@ import (
 
 	"github.com/MatusOllah/slogcolor"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
+	"github.com/Nadim147c/waybar-lyric/cmd/position"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/carapace-sh/carapace"
 	"github.com/fatih/color"
@@ -35,6 +36,7 @@ func init() {
 	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
 
 	Command.AddCommand(playpause.Command)
+	Command.AddCommand(position.Command)
 
 	comp := carapace.Gen(Command)
 	comp.Standalone()
