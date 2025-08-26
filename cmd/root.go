@@ -17,23 +17,24 @@ import (
 )
 
 func init() {
-	Command.Flags().BoolP("help", "h", false, "Display help for waybar-lyric")
 	Command.Flags().BoolVarP(&config.Compact, "compact", "c", config.Compact, "Output only text content on each line")
 	Command.Flags().BoolVarP(&config.Detailed, "detailed", "d", config.Detailed, "Put detailed player information in output (Experimental)")
 	Command.Flags().BoolVarP(&config.LyricOnly, "lyric-only", "l", config.LyricOnly, "Display only lyrics in text output")
 	Command.Flags().BoolVarP(&config.PrintInit, "init", "i", config.PrintInit, "Display JSON snippet for waybar/config.jsonc")
 	Command.Flags().BoolVarP(&config.PrintVersion, "version", "V", config.PrintVersion, "Display waybar-lyric version information")
-	Command.Flags().BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
 	Command.Flags().BoolVarP(&config.ToggleState, "toggle", "t", config.ToggleState, "Toggle player state between pause and resume")
-	Command.Flags().BoolVarP(&config.VerboseLog, "verbose", "v", config.VerboseLog, "Enable verbose logging")
 	Command.Flags().IntVarP(&config.BreakTooltip, "break-tooltip", "b", config.BreakTooltip, "Break long lines in tooltip")
 	Command.Flags().IntVarP(&config.MaxTextLength, "max-length", "m", config.MaxTextLength, "Set maximum character length for lyrics text")
 	Command.Flags().IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
 	Command.Flags().StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
-	Command.Flags().StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
 	Command.Flags().StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
 
 	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
+
+	Command.PersistentFlags().BoolP("help", "h", false, "Display help for waybar-lyric")
+	Command.PersistentFlags().BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
+	Command.PersistentFlags().BoolVarP(&config.VerboseLog, "verbose", "v", config.VerboseLog, "Enable verbose logging")
+	Command.PersistentFlags().StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
 
 	Command.AddCommand(playpause.Command)
 	Command.AddCommand(position.Command)
@@ -53,13 +54,13 @@ var Command = &cobra.Command{
 	Short:        "A waybar module for song lyrics",
 	SilenceUsage: true,
 	Run:          Execute,
-	PostRunE: func(_ *cobra.Command, _ []string) error {
+	PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
 		if logFile != nil {
 			return logFile.Close()
 		}
 		return nil
 	},
-	PreRunE: func(cmd *cobra.Command, _ []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		if config.ToggleState {
 			defer func() {
 				cmd.RemoveCommand(playpause.Command)
