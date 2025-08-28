@@ -1,13 +1,22 @@
 package main
 
 import (
-	"os"
-
 	"github.com/Nadim147c/waybar-lyric/cmd"
+	cc "github.com/ivanpirog/coloredcobra"
 )
 
 func main() {
-	if err := cmd.Command.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cc.Init(&cc.Config{
+		RootCmd:         cmd.Command,
+		Headings:        cc.Cyan + cc.Bold + cc.Underline,
+		Commands:        cc.Yellow + cc.Bold,
+		CmdShortDescr:   cc.Bold,
+		Example:         cc.Italic,
+		ExecName:        cc.Bold,
+		Flags:           cc.Green + cc.Bold,
+		FlagsDataType:   cc.Red + cc.Bold,
+		NoExtraNewlines: true,
+	})
+
+	cmd.Command.Execute()
 }

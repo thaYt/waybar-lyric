@@ -11,6 +11,7 @@ require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/godbus/dbus/v5 v5.1.0
+	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
 )
