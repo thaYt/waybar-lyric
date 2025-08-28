@@ -15,12 +15,13 @@ import (
 	"time"
 
 	"github.com/Nadim147c/waybar-lyric/internal/player"
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
 // storeValue is Lyrics with LastAccess time
 type storeValue struct {
 	LastAccess time.Time
-	Lyrics     Lyrics
+	Lyrics     shared.Lyrics
 }
 
 // store is used to cache lyrics in memory
@@ -37,7 +38,7 @@ func newStore() *store {
 }
 
 // Save saves lyrics to Store
-func (s *store) Save(id string, lyrics Lyrics) {
+func (s *store) Save(id string, lyrics shared.Lyrics) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data[id] = &storeValue{
@@ -47,7 +48,7 @@ func (s *store) Save(id string, lyrics Lyrics) {
 }
 
 // Load loads lyrics from Store
-func (s *store) Load(key string) (Lyrics, bool) {
+func (s *store) Load(key string) (shared.Lyrics, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	v, exists := s.data[key]
@@ -103,7 +104,7 @@ func init() {
 }
 
 // SaveCache saves the lyrics to cache
-func SaveCache(info *player.Info, lines Lyrics, filePath string) error {
+func SaveCache(info *player.Info, lines shared.Lyrics, filePath string) error {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -128,14 +129,14 @@ func SaveCache(info *player.Info, lines Lyrics, filePath string) error {
 }
 
 // LoadCache loads the lyrics from cache
-func LoadCache(filePath string) (Lyrics, error) {
+func LoadCache(filePath string) (shared.Lyrics, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var lyrics Lyrics
+	var lyrics shared.Lyrics
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
@@ -157,7 +158,7 @@ func LoadCache(filePath string) (Lyrics, error) {
 		timestamp := time.Duration(ts)
 		text := strings.TrimSpace(parts[1])
 
-		lyric := Line{Timestamp: timestamp, Text: text}
+		lyric := shared.LyricLine{Timestamp: timestamp, Text: text}
 		lyrics = append(lyrics, lyric)
 	}
 

@@ -9,6 +9,7 @@
       "lyric": "",
       "music": "󰝚",
       "no_lyric": "",
+      "getting": "",
     },
     "exec-if": "which waybar-lyric",
     "exec": "waybar-lyric --quiet",

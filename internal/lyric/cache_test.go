@@ -3,11 +3,13 @@ package lyric
 import (
 	"testing"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
 func TestStore_SaveLoad(t *testing.T) {
 	s := newStore()
-	lyrics := Lyrics{{Text: "Hello"}}
+	lyrics := shared.Lyrics{{Text: "Hello"}}
 	id := "test-id"
 
 	// Save lyrics and verify they can be loaded
@@ -24,7 +26,7 @@ func TestStore_SaveLoad(t *testing.T) {
 func TestStore_LoadUpdatesAccessTime(t *testing.T) {
 	s := newStore()
 	id := "test-id"
-	s.Save(id, Lyrics{})
+	s.Save(id, shared.Lyrics{})
 
 	// Load once to get initial access time
 	_, _ = s.Load(id)
@@ -45,7 +47,7 @@ func TestStore_CleanupExpired(t *testing.T) {
 	threshold := 10 * time.Millisecond
 
 	// Save an entry and immediately mark it as expired by not accessing it
-	s.Save("expired", Lyrics{})
+	s.Save("expired", shared.Lyrics{})
 
 	// Wait for it to expire
 	time.Sleep(threshold + 5*time.Millisecond)
@@ -65,8 +67,8 @@ func TestStore_CleanupLoop(t *testing.T) {
 	ctx := t.Context()
 
 	// Save an entry and let it expire
-	s.Save("old", Lyrics{})
-	s.Save("new", Lyrics{})
+	s.Save("old", shared.Lyrics{})
+	s.Save("new", shared.Lyrics{})
 
 	// Make the old entry 1hour old
 	s.data["old"].LastAccess = time.Now().Add(-time.Hour)
