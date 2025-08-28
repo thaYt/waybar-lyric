@@ -18,7 +18,7 @@ func init() {
 	Command.Flags().BoolVarP(&lyricsLine, "lyric", "l", lyricsLine, "Set player seek to lyrics line number")
 }
 
-// Command is the position changer command
+// Command is the position seeker command
 var Command = &cobra.Command{
 	Use: "seek [+/-]<offset[m|s|ms|ns] or line-number-offset>",
 	Example: `  waybar-lyric seek 20s # Seeks 20 seconds ahead
