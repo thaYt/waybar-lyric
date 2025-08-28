@@ -83,9 +83,9 @@ func urlIDFunc(p *mpris.Player) (uint64, error) {
 
 	id := ""
 	if strings.Contains(host, "music.youtube.com") {
-		id = parsed.Query().Get("v") // ?v=xxx
+		id = "youtube:" + parsed.Query().Get("v") // ?v=xxx
 	} else if strings.Contains(host, "open.spotify.com") {
-		id = path.Base(parsed.Path) // /track/xxx
+		id = "spotify:" + path.Base(parsed.Path) // /track/xxx
 	}
 
 	if id == "" {
@@ -95,11 +95,16 @@ func urlIDFunc(p *mpris.Player) (uint64, error) {
 	return xxhash.Sum64String(parsed.Host + ":" + id), nil
 }
 
-var supportedPlayers = map[string]IDFunc{
-	"spotify":          trackIDFunc,
-	"YoutubeMusic":     trackIDFunc,
-	"amarok":           artistTitleFunc,
-	"io.bassi.Amberol": artistTitleFunc,
+type players struct {
+	name   string
+	idFunc IDFunc
+}
+
+var supportedPlayers = []players{
+	{"spotify", urlIDFunc},
+	{"YoutubeMusic", urlIDFunc},
+	{"amarok", artistTitleFunc},
+	{"io.bassi.Amberol", artistTitleFunc},
 }
 
 // Select selects correct parses for player
@@ -115,11 +120,11 @@ func Select(conn *dbus.Conn) (*mpris.Player, Parser, error) {
 	}
 
 	// First: explicitly supported players
-	for name, idFunc := range supportedPlayers {
-		playerName := mpris.BaseInterface + "." + name
+	for p := range slices.Values(supportedPlayers) {
+		playerName := mpris.BaseInterface + "." + p.name
 		if slices.Contains(players, playerName) {
 			slog.Debug("Player selected", "name", playerName)
-			return mpris.New(conn, playerName), parserWithIDFunc(DefaultParser, idFunc), nil
+			return mpris.New(conn, playerName), parserWithIDFunc(DefaultParser, p.idFunc), nil
 		}
 	}
 
