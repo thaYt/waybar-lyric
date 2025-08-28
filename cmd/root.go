@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/MatusOllah/slogcolor"
+	initcmd "github.com/Nadim147c/waybar-lyric/cmd/init"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
 	"github.com/Nadim147c/waybar-lyric/cmd/position"
 	"github.com/Nadim147c/waybar-lyric/cmd/seek"
@@ -30,13 +31,17 @@ func init() {
 	Command.Flags().StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
 	Command.Flags().StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
 
+	Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'.")
 	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")
+
+	Command.MarkFlagsMutuallyExclusive("toggle", "init")
 
 	Command.PersistentFlags().BoolP("help", "h", false, "Display help for waybar-lyric")
 	Command.PersistentFlags().BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
 	Command.PersistentFlags().BoolVarP(&config.VerboseLog, "verbose", "v", config.VerboseLog, "Enable verbose logging")
 	Command.PersistentFlags().StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
 
+	Command.AddCommand(initcmd.Command)
 	Command.AddCommand(playpause.Command)
 	Command.AddCommand(position.Command)
 	Command.AddCommand(seek.Command)
@@ -67,6 +72,14 @@ var Command = &cobra.Command{
 			defer func() {
 				cmd.RemoveCommand(playpause.Command)
 				playpause.Command.Execute()
+				os.Exit(0)
+			}()
+		}
+
+		if config.PrintInit {
+			defer func() {
+				cmd.RemoveCommand(initcmd.Command)
+				initcmd.Command.Execute()
 				os.Exit(0)
 			}()
 		}
