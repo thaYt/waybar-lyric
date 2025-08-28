@@ -28,11 +28,6 @@ func Execute(_ *cobra.Command, _ []string) {
 		return
 	}
 
-	if config.PrintInit {
-		PrintSnippet()
-		return
-	}
-
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		slog.Error("Failed to create dbus connection", "error", err)
