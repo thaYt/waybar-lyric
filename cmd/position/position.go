@@ -22,8 +22,7 @@ var Command = &cobra.Command{
 	Use: "position <position[m|s|ms|ns] or line-number>",
 	Example: `  waybar-lyric position 20s # Set the player position to 20 seconds
   waybar-lyric position --lyric 1 # Set the player position to first lyrics line
-  waybar-lyric position -- -10s # Set player position 10 seconds before the end
-	`,
+  waybar-lyric position -- -10s # Set player position 10 seconds before the end`,
 	Short: "Set position player position",
 	Args:  cobra.ExactArgs(1),
 
