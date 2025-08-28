@@ -6,14 +6,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
 // ParseLyrics parses a string containing time-synchronized lyrics in the format [MM:SS.ss]Lyric text
 // and returns a slice of LyricLine structs. Each line in the input should follow the format
 // "[timestamp]lyric text", where timestamp is in a format parseable by ParseTimestamp.
 // Empty lines and malformed lines are skipped.
-func ParseLyrics(file string) (Lyrics, error) {
-	lyrics := Lyrics{{}} // add empty line a start of the lyrics
+func ParseLyrics(file string) (shared.Lyrics, error) {
+	lyrics := shared.Lyrics{{}} // add empty line a start of the lyrics
 	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
@@ -32,7 +34,7 @@ func ParseLyrics(file string) (Lyrics, error) {
 			continue
 		}
 
-		lyric := Line{Timestamp: timestamp, Text: lyricLine}
+		lyric := shared.LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
 	}
 

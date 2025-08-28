@@ -14,8 +14,23 @@ import (
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
+	"github.com/Nadim147c/waybar-lyric/internal/waybar"
 )
+
+// LrcLibResponse is the response sent from LrcLib api
+type LrcLibResponse struct {
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	TrackName    string  `json:"trackName"`
+	ArtistName   string  `json:"artistName"`
+	AlbumName    string  `json:"albumName"`
+	Duration     float64 `json:"duration"`
+	Instrumental bool    `json:"instrumental"`
+	PlainLyrics  string  `json:"plainLyrics"`
+	SyncedLyrics string  `json:"syncedLyrics"`
+}
 
 var (
 	//revive:disable
@@ -48,7 +63,7 @@ func request(params url.Values, header http.Header) (*http.Response, error) {
 }
 
 // CensorLyrics censors the lyrics with given filtering type
-func CensorLyrics(lyrics Lyrics) {
+func CensorLyrics(lyrics shared.Lyrics) {
 	if config.FilterProfanity {
 		for i, l := range lyrics {
 			lyrics[i].Text = str.CensorText(l.Text, config.FilterProfanityType)
@@ -57,7 +72,7 @@ func CensorLyrics(lyrics Lyrics) {
 }
 
 // GetLyrics returns lyrics for given *player.Info
-func GetLyrics(info *player.Info) (Lyrics, error) {
+func GetLyrics(info *player.Info) (shared.Lyrics, error) {
 	uri := filepath.Base(info.ID)
 	uri = strings.ReplaceAll(uri, "/", "-")
 
@@ -79,6 +94,11 @@ func GetLyrics(info *player.Info) (Lyrics, error) {
 	}
 	slog.Warn("Can't find the lyrics in the cache", "error", err)
 
+	w := waybar.ForPlayer(info)
+	w.Alt = waybar.Getting
+	w.Class = append(w.Class, waybar.Getting)
+	w.Encode()
+
 	queryParams := url.Values{}
 	queryParams.Set("track_name", info.Title)
 	queryParams.Set("artist_name", info.Artist)
@@ -99,34 +119,34 @@ func GetLyrics(info *player.Info) (Lyrics, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		Store.Save(uri, Lyrics{})
+		Store.Save(uri, shared.Lyrics{})
 		return nil, ErrLyricsNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		Store.Save(uri, Lyrics{})
+		Store.Save(uri, shared.Lyrics{})
 		return nil, fmt.Errorf("unexpected HTTP status: %d", resp.StatusCode)
 	}
 
 	var resJSON LrcLibResponse
 	err = json.NewDecoder(resp.Body).Decode(&resJSON)
 	if err != nil {
-		Store.Save(uri, Lyrics{})
+		Store.Save(uri, shared.Lyrics{})
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	lyrics, err := ParseLyrics(resJSON.SyncedLyrics)
 	if err != nil {
-		Store.Save(uri, Lyrics{})
+		Store.Save(uri, shared.Lyrics{})
 		return nil, fmt.Errorf("failed to parse lyrics: %w", err)
 	}
 
 	if len(lyrics) == 0 {
-		Store.Save(uri, Lyrics{})
+		Store.Save(uri, shared.Lyrics{})
 		return nil, ErrLyricsNotSynced
 	}
 
-	slices.SortFunc(lyrics, func(a, b Line) int {
+	slices.SortFunc(lyrics, func(a, b shared.LyricLine) int {
 		return int((a.Timestamp - b.Timestamp) / time.Millisecond)
 	})
 

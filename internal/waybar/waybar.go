@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/Nadim147c/waybar-lyric/internal/config"
-	"github.com/Nadim147c/waybar-lyric/internal/lyric"
 	"github.com/Nadim147c/waybar-lyric/internal/player"
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 	"github.com/Nadim147c/waybar-lyric/internal/str"
 )
 
@@ -40,7 +40,7 @@ func ForPlayer(p *player.Info) *Waybar {
 }
 
 // ForLyrics returns Waybar for lyrics
-func ForLyrics(lyrics lyric.Lyrics, idx int) *Waybar {
+func ForLyrics(lyrics shared.Lyrics, idx int) *Waybar {
 	currentLine := lyrics[idx]
 	start := max(idx-2, 0)
 	end := min(idx+config.TooltipLines-2, len(lyrics))
@@ -93,6 +93,7 @@ const (
 	Playing Status = "playing"
 	Paused  Status = "paused"
 	NoLyric Status = "no_lyric"
+	Getting Status = "getting"
 	//revive:enable
 )
 
@@ -101,13 +102,13 @@ type Class []Status
 
 // Waybar is structure data which can be printed to for waybar output
 type Waybar struct {
-	Text       string        `json:"text"`
-	Class      Class         `json:"class"`
-	Alt        Status        `json:"alt"`
-	Tooltip    string        `json:"tooltip"`
-	Percentage int           `json:"percentage"`
-	Info       *player.Info  `json:"info,omitempty"`
-	Context    *lyric.Lyrics `json:"context,omitempty"`
+	Text       string         `json:"text"`
+	Class      Class          `json:"class"`
+	Alt        Status         `json:"alt"`
+	Tooltip    string         `json:"tooltip"`
+	Percentage int            `json:"percentage"`
+	Info       *player.Info   `json:"info,omitempty"`
+	Context    *shared.Lyrics `json:"context,omitempty"`
 }
 
 // JSON is the json encoder for waybar
