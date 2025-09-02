@@ -2,6 +2,7 @@ package lyric
 
 import (
 	"fmt"
+	"log/slog"
 	"slices"
 	"strconv"
 	"strings"
@@ -31,11 +32,16 @@ func ParseLyrics(file string) (shared.Lyrics, error) {
 
 		timestamp, err := ParseTimestamp(timestampStr)
 		if err != nil {
+			slog.Debug("Failed to parse timestamp", "timestamp", timestampStr, "error", err)
 			continue
 		}
 
 		lyric := shared.LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
+	}
+
+	if len(lyrics) == 1 {
+		return nil, ErrLyricsNotSynced
 	}
 
 	return lyrics, nil
