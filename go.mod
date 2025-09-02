@@ -8,7 +8,6 @@ require (
 	github.com/MatusOllah/slogcolor v1.7.0
 	github.com/Nadim147c/go-mpris v0.4.0
 	github.com/carapace-sh/carapace v1.8.6
-	github.com/cespare/xxhash v1.1.0
 	github.com/fatih/color v1.18.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/ivanpirog/coloredcobra v1.0.1
