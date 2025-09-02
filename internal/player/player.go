@@ -1,16 +1,17 @@
 package player
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"path"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/Nadim147c/go-mpris"
-	"github.com/cespare/xxhash"
 	"github.com/godbus/dbus/v5"
 	"github.com/spf13/cast"
 )
@@ -30,69 +31,77 @@ var (
 type Parser func(*mpris.Player) (*Info, error)
 
 // IDFunc extracts a stable ID for a player.
-type IDFunc func(p *mpris.Player) (uint64, error)
+type IDFunc func(p *mpris.Player) (string, error)
+
+// Hash return sha256 hash for given string
+func Hash(v ...any) string {
+	h := sha256.New()
+	fmt.Fprint(h, v...)
+	hash := h.Sum(nil)
+	return base64.RawURLEncoding.EncodeToString(hash)
+}
 
 // trackIDFunc: uses mpris:trackid as ID source
-func trackIDFunc(p *mpris.Player) (uint64, error) {
+func trackIDFunc(p *mpris.Player) (string, error) {
 	meta, err := p.GetMetadata()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	val, ok := meta["mpris:trackid"]
 	if !ok {
-		return 0, ErrNoID
+		return "", ErrNoID
 	}
 
-	return xxhash.Sum64String(val.String()), nil
+	return Hash(val), nil
 }
 
 // artistTitleFunc: uses artist+title combo as ID source
-func artistTitleFunc(p *mpris.Player) (uint64, error) {
+func artistTitleFunc(p *mpris.Player) (string, error) {
 	artists, err := p.GetArtist()
 	if err != nil || len(artists) == 0 {
-		return 0, ErrNoArtists
+		return "", ErrNoArtists
 	}
 	artist := artists[0]
 
 	title, err := p.GetTitle()
 	if err != nil || title == "" {
-		return 0, ErrNoTitle
+		return "", ErrNoTitle
 	}
 
-	return xxhash.Sum64String(artist + ":" + title), nil
+	return Hash(artist, ":", title), nil
 }
 
 // urlIDFunc: derive ID from URL for fallback players like Firefox
-func urlIDFunc(p *mpris.Player) (uint64, error) {
+func urlIDFunc(p *mpris.Player) (string, error) {
 	u, err := p.GetURL()
 	if err != nil || u == "" {
-		return 0, ErrNoID
+		return "", ErrNoID
 	}
 
 	parsed, err := url.Parse(u)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	host := strings.ToLower(parsed.Host)
 
 	// Only allow music.youtube.com and open.spotify.com
 	if !(strings.Contains(host, "music.youtube.com") || strings.Contains(host, "open.spotify.com")) {
-		return 0, ErrNoID
+		return "", ErrNoID
 	}
 
 	id := ""
 	if strings.Contains(host, "music.youtube.com") {
-		id = "youtube:" + parsed.Query().Get("v") // ?v=xxx
+		id = parsed.Query().Get("v") // ?v=xxx
 	} else if strings.Contains(host, "open.spotify.com") {
-		id = "spotify:" + path.Base(parsed.Path) // /track/xxx
+		id = path.Base(parsed.Path) // /track/xxx
 	}
 
 	if id == "" {
-		return 0, ErrNoID
+		return "", ErrNoID
 	}
 
-	return xxhash.Sum64String(parsed.Host + ":" + id), nil
+	return Hash(host, ":", id), nil
 }
 
 type players struct {
@@ -165,7 +174,7 @@ func parserWithIDFunc(f Parser, i IDFunc) Parser {
 			return info, err
 		}
 
-		info.ID = strconv.FormatUint(id, 32)
+		info.ID = id
 		return info, nil
 	}
 }
