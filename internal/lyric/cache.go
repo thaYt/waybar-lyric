@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/Nadim147c/waybar-lyric/internal/player"
 	"github.com/Nadim147c/waybar-lyric/internal/shared"
@@ -114,9 +115,30 @@ func SaveCache(info *player.Info, lines shared.Lyrics, filePath string) error {
 	// Write player info as comments before lyrics
 	fmt.Fprintf(file, "# PLAYER: %s\n", info.Player)
 	fmt.Fprintf(file, "# ID: %s\n", info.ID)
-	fmt.Fprintf(file, "# ARTIST: %s\n", info.Artist)
-	fmt.Fprintf(file, "# TITLE: %s\n", info.Title)
-	fmt.Fprintf(file, "# ALBUM: %s\n", info.Album)
+	metaLines := make([]string, 0, len(info.Metadata))
+	for k, v := range info.Metadata {
+		// Convert metadata key to SNAKE_CASE
+		keysplit := strings.SplitN(k, ":", 2)
+		if len(keysplit) != 2 {
+			continue
+		}
+		var key strings.Builder
+		for _, r := range keysplit[1] {
+			if unicode.IsUpper(r) {
+				key.WriteByte('_')
+			}
+			key.WriteRune(unicode.ToUpper(r))
+		}
+		metaLines = append(metaLines, fmt.Sprintf("# %s: %s", key.String(), v))
+	}
+
+	slices.SortFunc(metaLines, func(a, b string) int {
+		return strings.Compare(a, b)
+	})
+
+	for line := range slices.Values(metaLines) {
+		fmt.Fprintln(file, line)
+	}
 
 	// Write lyrics
 	for line := range slices.Values(lines) {

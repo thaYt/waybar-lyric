@@ -235,17 +235,18 @@ func DefaultParser(player *mpris.Player) (*Info, error) {
 	trackid := cast.ToString(idValue.Value())
 
 	info := &Info{
-		Player:  player.GetName(),
-		ID:      trackid,
-		Artist:  artist,
-		Title:   title,
-		Album:   album,
-		URL:     pu,
-		Status:  status,
-		Volume:  volume,
-		Length:  length,
-		Shuffle: shuffle,
-		Cover:   cover,
+		Player:   player.GetName(),
+		Album:    album,
+		Artist:   artist,
+		Cover:    cover,
+		ID:       trackid,
+		Length:   length,
+		Metadata: meta,
+		Shuffle:  shuffle,
+		Status:   status,
+		Title:    title,
+		URL:      pu,
+		Volume:   volume,
 	}
 
 	err = info.UpdatePosition(player)
