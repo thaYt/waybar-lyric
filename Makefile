@@ -10,6 +10,8 @@ BASHCOMPDIR?= $(PREFIX)/share/bash-completion/completions
 FISHCOMPDIR?= $(PREFIX)/share/fish/vendor_completions.d
 ZSHCOMPDIR ?= $(PREFIX)/share/zsh/site-functions
 
+-include Makefile.local
+
 # Default target
 .PHONY: all
 all: build

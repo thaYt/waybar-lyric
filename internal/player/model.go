@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Nadim147c/go-mpris"
+	"github.com/godbus/dbus/v5"
 )
 
 // Info holds all information of currently playing track metadata
@@ -19,7 +20,8 @@ type Info struct {
 	Album  string `json:"album"`
 	Cover  string `json:"cover"`
 
-	URL *url.URL `json:"-"`
+	URL      *url.URL                `json:"-"`
+	Metadata map[string]dbus.Variant `json:"-"`
 
 	Volume   float64       `json:"volume"`
 	Position time.Duration `json:"position"`
