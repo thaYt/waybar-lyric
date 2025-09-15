@@ -31,6 +31,7 @@ func init() {
 	Command.Flags().IntVarP(&config.TooltipLines, "tooltip-lines", "L", config.TooltipLines, "Set maximum number of lines in waybar tooltip")
 	Command.Flags().StringVarP(&config.FilterProfanityType, "filter-profanity", "f", config.FilterProfanityType, "Filter profanity from lyrics (values: full, partial)")
 	Command.Flags().StringVarP(&config.TooltipColor, "tooltip-color", "C", config.TooltipColor, "Set color for inactive lyrics lines")
+	Command.Flags().BoolVarP(&config.Simplify, "simplify", "s", config.Simplify, "lowercase + remove some other substitutions")
 
 	Command.Flags().MarkDeprecated("init", "use 'waybar-lyric init'.")
 	Command.Flags().MarkDeprecated("toggle", "use 'waybar-lyric play-pause'.")

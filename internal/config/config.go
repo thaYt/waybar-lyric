@@ -14,6 +14,7 @@ var (
 	TooltipLines    = 8
 	TooltipColor    = "#cccccc"
 	FilterProfanity = false
+	Simplify        = false
 	LogFilePath     = ""
 
 	FilterProfanityType = ""

@@ -25,6 +25,12 @@ func ForPlayer(p *player.Info) *Waybar {
 		text = fmt.Sprintf("%s - %s", p.Artist, p.Title)
 	}
 
+	if config.Simplify {
+		p.Title = strings.ToLower(p.Title)
+		p.Artist = strings.ToLower(p.Artist)
+		p.Album = strings.ToLower(p.Album)
+	}
+
 	waybar := &Waybar{
 		Class:      Class{alt},
 		Text:       text,
