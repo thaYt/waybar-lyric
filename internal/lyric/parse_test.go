@@ -1,9 +1,11 @@
-package main
+package lyric
 
 import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
 func TestParseTimestamp(t *testing.T) {
@@ -118,7 +120,10 @@ func TestParseTimestamp(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("parseTimestamp() succeeded unexpectedly")
 			}
-			t.Logf("parseTimestamp() = %v, want %v", got, tt.want)
+
+			if got != tt.want {
+				t.Logf("parseTimestamp() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
@@ -127,24 +132,24 @@ func TestParseLyrics(t *testing.T) {
 	tests := []struct {
 		name string
 		file string
-		want []LyricLine
+		want shared.Lyrics
 	}{
 		{
 			name: "Empty file",
 			file: "",
-			want: []LyricLine{},
+			want: shared.Lyrics{},
 		},
 		{
 			name: "Single valid line",
 			file: "[00:15.00]Hello world",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 15 * time.Second, Text: "Hello world"},
 			},
 		},
 		{
 			name: "Multiple valid lines",
 			file: "[00:05.00]First line\n[00:10.50]Second line\n[01:30.75]Third line",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{Timestamp: 10*time.Second + 500*time.Millisecond, Text: "Second line"},
 				{Timestamp: 1*time.Minute + 30*time.Second + 750*time.Millisecond, Text: "Third line"},
@@ -153,7 +158,7 @@ func TestParseLyrics(t *testing.T) {
 		{
 			name: "Skip empty lines",
 			file: "[00:05.00]First line\n\n[00:10.50]Second line",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{Timestamp: 10*time.Second + 500*time.Millisecond, Text: "Second line"},
 			},
@@ -161,7 +166,7 @@ func TestParseLyrics(t *testing.T) {
 		{
 			name: "Skip invalid format lines",
 			file: "[00:05.00]First line\nInvalid line\n[00:10.50]Second line",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{Timestamp: 10*time.Second + 500*time.Millisecond, Text: "Second line"},
 			},
@@ -169,7 +174,7 @@ func TestParseLyrics(t *testing.T) {
 		{
 			name: "Skip invalid timestamp",
 			file: "[00:05.00]First line\n[invalid]Not parsed\n[00:10.50]Second line",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 5 * time.Second, Text: "First line"},
 				{Timestamp: 10*time.Second + 500*time.Millisecond, Text: "Second line"},
 			},
@@ -177,7 +182,7 @@ func TestParseLyrics(t *testing.T) {
 		{
 			name: "Handles whitespace in text",
 			file: "[00:05.00]  Text with spaces  ",
-			want: []LyricLine{
+			want: shared.Lyrics{
 				{Timestamp: 5 * time.Second, Text: "Text with spaces"},
 			},
 		},

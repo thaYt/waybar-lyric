@@ -8,11 +8,32 @@ A CLI tool that displays lyrics on your
 
 ![Example](./example/waybar/screenshot.png)
 
+> You can also use this tool to create interactive `eww` widget.
+
+<details>
+  <summary>Eww configuration!</summary>
+
+Checkout the [example](./example/eww/) configuration.
+
+![Example](./example/eww/screenshot.png)
+
+</details>
+
 ## Description
 
 `waybar-lyric` fetches and displays real-time lyrics on your Waybar. It provides a
 scrolling lyrics display that syncs with your currently playing music, enhancing your
 desktop music experience.
+
+## Supported Players
+
+- [Spotify](https://spotify.com)
+- [YouTubeMusic](https://github.com/th-ch/youtube-music)
+- [Amarok](https://amarok.kde.org/)
+- [Amberol](https://apps.gnome.org/en/Amberol/)
+- Firefox (Specific domains)
+  - `open.spotify.com`
+  - `music.youtube.com`
 
 ## Features
 
@@ -47,6 +68,12 @@ desktop music experience.
 - From [AUR](https://aur.archlinux.org/packages); Recommended for Arch `btw` users.
 
 ```bash
+yay -S waybar-lyric
+```
+
+or the latest git commit:
+
+```bash
 yay -S waybar-lyric-git
 ```
 
@@ -55,9 +82,9 @@ yay -S waybar-lyric-git
 On NixOS:
 
 ```nix
-  environment.systemPackages = [
-    pkgs.waybar-lyric
-  ];
+environment.systemPackages = [
+  pkgs.waybar-lyric
+];
 ```
 
 On Non NixOS:
@@ -81,27 +108,6 @@ go install github.com/Nadim147c/waybar-lyric@latest
 git clone https://github.com/Nadim147c/waybar-lyric.git
 cd waybar-lyric
 go install
-```
-
-## Usage
-
-```
-Usage: /usr/bin/waybar-lyric [options]
-Get lyrics on waybar.
-
-Options:
-  -c, --compact                   Output only text content on each line
-  -f, --filter-profanity string   Filter profanity from lyrics (values: full, partial)
-  -i, --init                      Display JSON snippet for waybar/config.jsonc
-  -o, --log-file string           Specify file path for saving logs
-  -l, --lyric-only                Display only lyrics in text output
-  -m, --max-length int            Set maximum character length for lyrics text (default 150)
-  -q, --quiet                     Suppress all log output
-  -t, --toggle                    Toggle player state between pause and resume
-  -C, --tooltip-color string      Set color for inactive lyrics lines (default "#cccccc")
-  -L, --tooltip-lines int         Set maximum number of lines in waybar tooltip (default 8)
-  -v, --verbose                   Enable verbose logging
-  -V, --version                   Display waybar-lyric version information
 ```
 
 ## Configuration

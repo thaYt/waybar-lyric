@@ -1,19 +1,22 @@
-package main
+package lyric
 
 import (
 	"fmt"
+	"log/slog"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Nadim147c/waybar-lyric/internal/shared"
 )
 
 // ParseLyrics parses a string containing time-synchronized lyrics in the format [MM:SS.ss]Lyric text
 // and returns a slice of LyricLine structs. Each line in the input should follow the format
 // "[timestamp]lyric text", where timestamp is in a format parseable by ParseTimestamp.
 // Empty lines and malformed lines are skipped.
-func ParseLyrics(file string) ([]LyricLine, error) {
-	lyrics := []LyricLine{{}} // add empty line a start of the lyrics
+func ParseLyrics(file string) (shared.Lyrics, error) {
+	lyrics := shared.Lyrics{{}} // add empty line a start of the lyrics
 	for line := range strings.SplitSeq(file, "\n") {
 		if line == "" {
 			continue
@@ -29,11 +32,16 @@ func ParseLyrics(file string) ([]LyricLine, error) {
 
 		timestamp, err := ParseTimestamp(timestampStr)
 		if err != nil {
+			slog.Debug("Failed to parse timestamp", "timestamp", timestampStr, "error", err)
 			continue
 		}
 
-		lyric := LyricLine{Timestamp: timestamp, Text: lyricLine}
+		lyric := shared.LyricLine{Timestamp: timestamp, Text: lyricLine}
 		lyrics = append(lyrics, lyric)
+	}
+
+	if len(lyrics) == 1 {
+		return nil, ErrLyricsNotSynced
 	}
 
 	return lyrics, nil

@@ -1,4 +1,4 @@
-package main
+package str
 
 import (
 	"slices"
@@ -14,7 +14,7 @@ func BreakLine(line string, limit int) string {
 	words := strings.Fields(line)
 	var out strings.Builder
 
-	var lineLen int = 0
+	var lineLen int
 	for word := range slices.Values(words) {
 		wordlen := len(word)
 		if lineLen == 0 {
@@ -32,4 +32,16 @@ func BreakLine(line string, limit int) string {
 	}
 
 	return out.String()
+}
+
+// Truncate truncates using rune length from user input
+func Truncate(input string, limit int) string {
+	r := []rune(input)
+	if len(r) <= limit {
+		return input
+	}
+	if limit > 3 {
+		return string(r[:limit-3]) + "..."
+	}
+	return string(r[:limit])
 }
