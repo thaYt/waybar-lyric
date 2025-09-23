@@ -23,6 +23,10 @@ const SleepTime = 500 * time.Millisecond
 
 // Execute is the main function for lyrics
 func Execute(_ *cobra.Command, _ []string) {
+	if !config.Quiet {
+		PrintASCII()
+	}
+
 	if config.PrintVersion {
 		fmt.Fprint(os.Stderr, config.Version)
 		return

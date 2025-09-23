@@ -4,7 +4,7 @@ var (
 	PrintInit       = false
 	PrintVersion    = false
 	ToggleState     = false
-	VerboseLog      = false
+	Verbose         = false
 	Quiet           = false
 	LyricOnly       = false
 	Compact         = false
