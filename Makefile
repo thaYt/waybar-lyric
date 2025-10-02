@@ -1,14 +1,18 @@
-GO         ?= go
-REVIVE     ?= revive
-SRCBIN     ?= ./bin/waybar-lyric
-PREFIX     ?= /usr/local
+NAME = waybar-lyric
 
-BINDIR     ?= $(PREFIX)/bin
-DOCDIR     ?= $(PREFIX)/share/doc/waybar-lyric
-LICENSEDIR ?= $(PREFIX)/share/licenses/waybar-lyric
-BASHCOMPDIR?= $(PREFIX)/share/bash-completion/completions
-FISHCOMPDIR?= $(PREFIX)/share/fish/vendor_completions.d
-ZSHCOMPDIR ?= $(PREFIX)/share/zsh/site-functions
+GO      ?= go
+REVIVE  ?= revive
+SRC_BIN ?= bin/$(NAME)
+PREFIX  ?= /usr/local
+
+BIN_FILE        = $(shell realpath -m "$(PREFIX)/bin/$(NAME)")
+DOC_DIR         = $(shell realpath -m "$(PREFIX)/share/doc/$(NAME)")
+DOC_FILE        = $(shell realpath -m "$(PREFIX)/share/doc/$(NAME)/README.md")
+LICENSE_DIR     = $(shell realpath -m "$(PREFIX)/share/licenses/$(NAME)")
+LICENSE_FILE    = $(shell realpath -m "$(PREFIX)/share/licenses/$(NAME)/LICENSE")
+BASH_COMPLETION = $(shell realpath -m "$(PREFIX)/share/bash-completion/completions/$(NAME)")
+ZSH_COMPLETION  = $(shell realpath -m "$(PREFIX)/share/zsh/site-functions/_$(NAME)")
+FISH_COMPLETION = $(shell realpath -m "$(PREFIX)/share/fish/vendor_completions.d/$(NAME).fish")
 
 -include Makefile.local
 
@@ -19,7 +23,7 @@ all: build
 # Build the Go binary
 .PHONY: build
 build:
-	$(GO) build -v -trimpath -ldflags "-s -w" -o $(SRCBIN)
+	$(GO) build -trimpath -o $(SRC_BIN)
 
 # Build the Go binary
 .PHONY: test
@@ -30,21 +34,18 @@ test:
 # Clean up build artifacts
 .PHONY: clean
 clean:
-	rm -f waybar-lyric
+	rm -f $(SRC_BIN)
 
 .PHONY: install
 install:
-	install -Dm755 $(SRCBIN) $(BINDIR)/waybar-lyric
-	install -Dm644 LICENSE $(LICENSEDIR)/LICENSE
-	install -Dm644 README.md $(DOCDIR)/README.md
+	install -Dsm755 $(SRC_BIN) "$(BIN_FILE)"
+	install -Dm644  LICENSE    "$(LICENSE_FILE)"
+	install -Dm644  README.md  "$(DOC_FILE)"
 
-	$(SRCBIN) _carapace bash | install -Dm644 /dev/stdin $(BASHCOMPDIR)/waybar-lyric
-	$(SRCBIN) _carapace zsh  | install -Dm644 /dev/stdin $(ZSHCOMPDIR)/_waybar-lyric
-	$(SRCBIN) _carapace fish | install -Dm644 /dev/stdin $(FISHCOMPDIR)/waybar-lyric.fish
+	$(SRC_BIN) _carapace bash | install -Dm644 /dev/stdin "$(BASH_COMPLETION)"
+	$(SRC_BIN) _carapace zsh  | install -Dm644 /dev/stdin "$(ZSH_COMPLETION)"
+	$(SRC_BIN) _carapace fish | install -Dm644 /dev/stdin "$(FISH_COMPLETION)"
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(BINDIR)/waybar-lyric
-	rm -rf $(LICENSEDIR)
-	rm -rf $(DOCDIR)
-	rm -rf $(BASHCOMPDIR) $(ZSHCOMPDIR) $(FISHCOMPDIR)
+	@rm -vrf $(BIN_FILE) $(LICENSE_DIR) $(DOC_DIR) $(BASH_COMPLETION) $(ZSH_COMPLETION) $(FISH_COMPLETION)
