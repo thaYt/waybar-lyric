@@ -18,5 +18,5 @@ var (
 
 	FilterProfanityType = ""
 
-	Version = "waybar-lyric v0.12.0 (https://github.com/Nadim147c/waybar-lyric)"
+	Version = "waybar-lyric v0.12.2 (https://github.com/Nadim147c/waybar-lyric)"
 )
