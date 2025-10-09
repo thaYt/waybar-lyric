@@ -20,7 +20,7 @@ func init() {
 
 // Command is the position seeker command
 var Command = &cobra.Command{
-	Use: "seek [+/-]<offset[m|s|ms|ns] or line-number-offset>",
+	Use: "seek [+/-]<offset>[m/s/ms/ns]",
 	Example: `  waybar-lyric seek 20s # Seeks 20 seconds ahead
   waybar-lyric seek --lyric 1 # Seeks to next lyric line
   waybar-lyric seek -- -10s # Go back 20 seconds`,
