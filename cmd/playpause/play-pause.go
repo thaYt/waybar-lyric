@@ -9,18 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	// This flag for ignoring by the playPauseCmd when running for deprecreated
-	// waybar-lyric --toggle.
-	Command.Flags().BoolP("toggle", "t", false, "Toggle player state between pause and resume")
-	Command.Flags().MarkHidden("toggle")
-}
-
 // Command is the play-pause command
 var Command = &cobra.Command{
 	Use:          "play-pause",
 	Short:        "Toggle play-pause state",
 	SilenceUsage: true,
+	// Disable flag parsing
+	DisableFlagParsing: true,
 	RunE: func(_ *cobra.Command, _ []string) error {
 		conn, err := dbus.SessionBus()
 		if err != nil {

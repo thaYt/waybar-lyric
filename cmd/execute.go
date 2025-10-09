@@ -22,20 +22,20 @@ import (
 const SleepTime = 500 * time.Millisecond
 
 // Execute is the main function for lyrics
-func Execute(_ *cobra.Command, _ []string) {
+func Execute(cmd *cobra.Command, _ []string) error {
 	if !config.Quiet {
 		PrintASCII()
 	}
 
 	if config.PrintVersion {
 		fmt.Fprint(os.Stderr, config.Version)
-		return
+		return nil
 	}
 
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		slog.Error("Failed to create dbus connection", "error", err)
-		return
+		return nil
 	}
 
 	var mprisPlayer *mpris.Player
@@ -49,7 +49,7 @@ func Execute(_ *cobra.Command, _ []string) {
 	}
 	slog.Debug("Player selected", "player", mprisPlayer)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cmd.Context())
 	defer cancel()
 
 	// Clean In memery lyrics cache every 10 minute
@@ -80,7 +80,7 @@ func Execute(_ *cobra.Command, _ []string) {
 	for {
 		select {
 		case <-ctx.Done():
-			return // Clean exit on cancel
+			return ctx.Err()
 		case <-playerSignal:
 			slog.Debug("Received player update signal")
 		case <-instant:

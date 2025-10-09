@@ -64,7 +64,7 @@ var Command = &cobra.Command{
 	Use:          "waybar-lyric",
 	Short:        "A waybar module for song lyrics",
 	SilenceUsage: true,
-	Run:          Execute,
+	RunE:         Execute,
 	PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
 		if logFile != nil {
 			return logFile.Close()
