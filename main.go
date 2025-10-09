@@ -20,6 +20,7 @@ func main() {
 		fang.WithNotifySignal(os.Interrupt, os.Kill, syscall.SIGKILL, syscall.SIGTERM),
 		fang.WithVersion(config.Version),
 		fang.WithoutCompletions(),
+		fang.WithoutManpage(),
 		fang.WithErrorHandler(func(w io.Writer, styles fang.Styles, err error) {
 			if errors.Is(err, context.Canceled) {
 				err = errors.New("Closed by user")
