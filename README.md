@@ -1,5 +1,14 @@
 # waybar-lyric
 
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Nadim147c/waybar-lyric?style=for-the-badge&logo=go&labelColor=11140F&color=BBE9AA)](https://pkg.go.dev/github.com/Nadim147c/waybar-lyric)
+[![GitHub Repo stars](https://img.shields.io/github/stars/Nadim147c/waybar-lyric?style=for-the-badge&logo=github&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric)
+[![GitHub License](https://img.shields.io/github/license/Nadim147c/waybar-lyric?style=for-the-badge&logo=gplv3&labelColor=11140F&color=BBE9AA)](./LICENSE)
+[![GitHub Tag](https://img.shields.io/github/v/tag/Nadim147c/waybar-lyric?include_prereleases&sort=semver&style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric/tags)
+[![Git Commit](https://img.shields.io/github/last-commit/Nadim147c/waybar-lyric?style=for-the-badge&logo=git&labelColor=11140F&color=BBE9AA)](https://github.com/Nadim147c/waybar-lyric/tags)
+
+> [!IMPORTANT]
+> 🔥 Found this useful? A quick star goes a long way.
+
 A CLI tool that displays lyrics on your
 [Waybar](https://github.com/Alexays/Waybar) for Linux systems.
 
