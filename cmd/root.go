@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MatusOllah/slogcolor"
 	initcmd "github.com/Nadim147c/waybar-lyric/cmd/init"
 	"github.com/Nadim147c/waybar-lyric/cmd/playpause"
 	"github.com/Nadim147c/waybar-lyric/cmd/position"
@@ -15,7 +14,7 @@ import (
 	"github.com/Nadim147c/waybar-lyric/cmd/volume"
 	"github.com/Nadim147c/waybar-lyric/internal/config"
 	"github.com/carapace-sh/carapace"
-	"github.com/fatih/color"
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -40,8 +39,11 @@ func init() {
 
 	Command.PersistentFlags().BoolP("help", "h", false, "Display help for waybar-lyric")
 	Command.PersistentFlags().BoolVarP(&config.Quiet, "quiet", "q", config.Quiet, "Suppress all log output")
-	Command.PersistentFlags().BoolVarP(&config.VerboseLog, "verbose", "v", config.VerboseLog, "Enable verbose logging")
+	Command.PersistentFlags().BoolVarP(&config.Verbose, "verbose", "v", config.Verbose, "Enable verbose logging")
 	Command.PersistentFlags().StringVarP(&config.LogFilePath, "log-file", "o", config.LogFilePath, "Specify file path for saving logs")
+
+	Command.MarkFlagsMutuallyExclusive("quiet", "verbose")
+	Command.MarkFlagsMutuallyExclusive("quiet", "log-file")
 
 	Command.AddCommand(initcmd.Command)
 	Command.AddCommand(playpause.Command)
@@ -63,7 +65,7 @@ var Command = &cobra.Command{
 	Use:          "waybar-lyric",
 	Short:        "A waybar module for song lyrics",
 	SilenceUsage: true,
-	Run:          Execute,
+	RunE:         Execute,
 	PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
 		if logFile != nil {
 			return logFile.Close()
@@ -105,20 +107,14 @@ var Command = &cobra.Command{
 			return nil
 		}
 
-		opts := slogcolor.DefaultOptions
-		opts.LevelTags = map[slog.Level]string{
-			slog.LevelDebug: color.New(color.FgGreen).Sprint("DEBUG"),
-			slog.LevelInfo:  color.New(color.FgCyan).Sprint("INFO "),
-			slog.LevelWarn:  color.New(color.FgYellow).Sprint("WARN "),
-			slog.LevelError: color.New(color.FgRed).Sprint("ERROR"),
+		if config.Verbose {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
 		}
 
-		if config.VerboseLog {
-			opts.Level = slog.LevelDebug
-		}
+		handler := slog.New(log.New(os.Stderr))
 
 		if config.LogFilePath == "" {
-			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+			slog.SetDefault(handler)
 			return nil
 		}
 
@@ -126,13 +122,12 @@ var Command = &cobra.Command{
 
 		file, err := os.OpenFile(config.LogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
-			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+			slog.SetDefault(handler)
 			slog.Error("Failed to open log-file", "error", err)
 			return err
 		}
 
-		opts.NoColor = true
-		slog.SetDefault(slog.New(slogcolor.NewHandler(file, opts)))
+		slog.SetDefault(slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{AddSource: true})))
 		logFile = file
 
 		return nil

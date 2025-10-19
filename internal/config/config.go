@@ -4,7 +4,7 @@ var (
 	PrintInit       = false
 	PrintVersion    = false
 	ToggleState     = false
-	VerboseLog      = false
+	Verbose         = false
 	Quiet           = false
 	LyricOnly       = false
 	Compact         = false
@@ -19,5 +19,5 @@ var (
 
 	FilterProfanityType = ""
 
-	Version = "waybar-lyric v0.12.0 (https://github.com/Nadim147c/waybar-lyric)"
+	Version = "waybar-lyric v0.12.2 (https://github.com/Nadim147c/waybar-lyric)"
 )
